@@ -58,7 +58,7 @@ init with {:
 		ELSE, END, EQTYPE, EXCEPTION, FN, FUN, FUNCTOR, FUNSIG, HANDLE,
 		IF, IN, INCLUDE, INFIX, INFIXR, LAZY, LET, LOCAL, NONFIX,
 		OF, OP, OPEN, ORELSE, RAISE, REC, SHARING, SIG, SIGNATURE,
-		STRUCT, STRUCTURE, THEN, TYPE, VAL, WHERE, WHILE, WITH, WITHTYPE;
+		STRUCT, STRUCTURE, THEN, TYPE, USE, VAL, WHERE, WHILE, WITH, WITHTYPE;
 
 	terminal LPAREN, RPAREN, LBRACKET, LVECTOR, RBRACKET, LBRACE, RBRACE,
 		DOT, COMMA, COLON, COLONGT, SEMIC, DOTDOTDOT, UNDER, BAR, EQUALS,
@@ -332,6 +332,8 @@ init with {:
 			{: RESULT = withPos(new ExnDec(eb),eleft,ebright); :} |
 		OPEN:o qidents1:ids
 			{: RESULT = withPos(new OpenDec(ids),oleft,idsright); :} |
+		USE:u qident:id
+			{: RESULT = withPos(new OpenDec(list(id)),uleft,idright); :} |
 		fixity:f idents2:ids
 			{: RESULT = withPos(new FixityDec(f,ids),fleft,idsright); :};
 			

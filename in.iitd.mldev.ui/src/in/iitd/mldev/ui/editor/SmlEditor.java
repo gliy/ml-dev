@@ -21,6 +21,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.TextEditor;
+import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
 import org.eclipse.ui.texteditor.MarkerUtilities;
@@ -46,26 +47,32 @@ public class SmlEditor extends TextEditor implements ISmlProgramListener {
         setSourceViewerConfiguration(new SmlSourceViewerConfiguration(this));
         setRangeIndicator(new DefaultRangeIndicator());
         showOverviewRuler();
+        setKeyBindingScopes(new String[]{"in.iitd.mldev.ui.editor.context"});
 	}
 
 	/** Returns this editor's outline page if requested. (This is how
 	 * Eclipse gets the outline from the editor.) If the request is for
 	 * something else, passes it on to the superclass. */
 	@Override
-	public Object getAdapter (@SuppressWarnings("rawtypes") Class adaptTo) {
-        if (adaptTo.equals(IContentOutlinePage.class)) {
+	public Object getAdapter (@SuppressWarnings("rawtypes") Class adapter) {
+        if (adapter.equals(IContentOutlinePage.class)) {
             if (outlinePage == null)
             	outlinePage = new SmlContentOutlinePage(this);
             return outlinePage;
         }
-        return super.getAdapter(adaptTo);
+        if (adapter.equals(IGotoMarker.class)) {
+            return super.getAdapter(adapter);
+        }
+        return super.getAdapter(adapter);
     }
+	
     
 	/** Called by Eclipse when creating the editor. Adds bracket matching. */
 	protected void configureSourceViewerDecorationSupport (SourceViewerDecorationSupport support) {
 		super.configureSourceViewerDecorationSupport(support);
 		support.setCharacterPairMatcher(new SmlBracketMatcher());
-		support.setMatchingCharacterPainterPreferenceKeys(SmlUiPlugin.SML_BRACKET_MATCHING_ENABLED, SmlUiPlugin.SML_BRACKET_MATCHING_COLOR);
+		support.setMatchingCharacterPainterPreferenceKeys(SmlUiPlugin.SML_BRACKET_MATCHING_ENABLED,
+				SmlUiPlugin.SML_BRACKET_MATCHING_COLOR);
 	}
 	
 	/** Returns the SmlProgram representing the document in this editor. */

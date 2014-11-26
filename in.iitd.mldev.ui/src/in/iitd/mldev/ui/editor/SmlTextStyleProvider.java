@@ -1,5 +1,7 @@
 package in.iitd.mldev.ui.editor;
 
+import java.util.List;
+
 import in.iitd.mldev.ui.SmlUiPlugin;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -13,7 +15,7 @@ import org.eclipse.swt.graphics.RGB;
 public class SmlTextStyleProvider {
 
 	private TextAttribute defaultStyle, keywordStyle, stringStyle, commentStyle;
-	
+	private TextAttribute[] rainbowParensStyle;
 	/** Creates a new text style provider. Currently, a new provider is
 	 * created for each SML editor. */
 	/* Colour preferences are only read in the constructor, which is why
@@ -26,6 +28,14 @@ public class SmlTextStyleProvider {
 		keywordStyle = new TextAttribute(new Color(null,keywordColor), null, SWT.BOLD);
 		stringStyle = new TextAttribute(new Color(null,stringColor), null, SWT.NORMAL);
 		commentStyle = new TextAttribute(new Color(null,commentColor), null, SWT.NORMAL);
+		
+		List<String> keys = SmlUiPlugin.getRainbowParenStrings();
+		rainbowParensStyle = new TextAttribute[keys.size()];
+		for(int i = 0 ; i <keys.size();i++) {
+			rainbowParensStyle[i] = new TextAttribute(
+					new Color(null, PreferenceConverter.getColor(store, keys.get(i))),
+					null, SWT.BOLD);
+		}
 	}
 
 	/** Disposes the colours allocated in the constructor. */
@@ -47,4 +57,8 @@ public class SmlTextStyleProvider {
 	public TextAttribute getKeywordStyle () {return keywordStyle;}
 	/** Returns the colour and font style for strings in the editor. */
 	public TextAttribute getStringStyle () {return stringStyle;}
+
+	public TextAttribute[] getRainbowParensStyle() {
+		return rainbowParensStyle;
+	}
 }

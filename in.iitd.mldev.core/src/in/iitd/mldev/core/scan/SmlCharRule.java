@@ -10,29 +10,39 @@ public class SmlCharRule implements IRule {
 	private IToken token;
 	public SmlCharRule (IToken successToken) {token = successToken;}
 	public IToken evaluate (ICharacterScanner scanner) {
-		if (scanner.read() != '#') {scanner.unread(); return Token.UNDEFINED;}
-		if (scanner.read() != '"') {scanner.unread(); scanner.unread(); return Token.UNDEFINED;}
-		boolean done = false;
-		do {
-			switch (scanner.read()) {
-				case '"':
-				case '\n':
-				case '\r':
-				case ICharacterScanner.EOF:
-					done = true;
-					break;
-				case '\\':
-					readEscSeq(scanner);
-					break;
-			}
-		} while (!done);
+		if (scanner.read() != '#') {return unread(scanner, 1);}
+		if (scanner.read() != '"') {return unread(scanner, 2);}
+		
+		int r = scanner.read();
+		int unreadCount = 3;
+		if (r == '"') {
+			return unread(scanner, unreadCount);
+		} else if(r == ICharacterScanner.EOF) {
+			return unread(scanner, unreadCount);
+		} else if (r == '\\') {
+			unreadCount += readEscSeq(scanner);
+		} 
+		r = scanner.read();
+		unreadCount++;
+		if (r != '"') {
+			return unread(scanner, unreadCount);
+		}
 		return token;
 	}
-	private void readEscSeq (ICharacterScanner scanner) {
+	private int readEscSeq (ICharacterScanner scanner) {
+		int readCount = 1;
 		if (isWhitespace(scanner.read())) {
-			while (isWhitespace(scanner.read())) {};
+			while (isWhitespace(scanner.read())) {readCount++;};
 			scanner.unread();
 		}
+		return readCount;
+	}
+	
+	private IToken unread(ICharacterScanner scanner, int count) {
+		for (int i = 0; i < count; i++) {
+			scanner.unread();
+		}
+		return Token.UNDEFINED;
 	}
 	private boolean isWhitespace (int c) {return (c==' ' || c=='\t' || c=='\f' || c=='\r' || c=='\n');}
 }

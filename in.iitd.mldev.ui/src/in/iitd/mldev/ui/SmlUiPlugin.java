@@ -1,5 +1,7 @@
 package in.iitd.mldev.ui;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -35,6 +37,18 @@ public class SmlUiPlugin extends AbstractUIPlugin {
 	/** Boolean attribute for whether to mark syntax errors in the editor. */
 	public static final String SML_MARK_ERRORS = "in.iitd.mldev.smlMarkErrors";
 
+	public static final String SML_RAINBOW_PAREN = "in.iitd.mldev.rainbowParen";
+	public static final int SML_RAINBOW_PAREN_COUNT = 8;
+	public static final RGB[] SML_RAINBOW_PAREN_DEFAULTS = new RGB[]{
+		new RGB(212, 23, 142),
+		new RGB(130, 3, 3),
+		new RGB(40,161,50),
+		new RGB(227,174,14),
+		new RGB(100,127,209),
+		new RGB(100, 204, 209),
+		new RGB(237,230,14),
+		new RGB(219,77,207),
+	};
 	//Resource bundle.
 	private ResourceBundle resourceBundle;
 
@@ -84,8 +98,24 @@ public class SmlUiPlugin extends AbstractUIPlugin {
 		PreferenceConverter.setDefault(store, SML_KEYWORD_COLOR, new RGB(128,0,128));
 		PreferenceConverter.setDefault(store, SML_STRING_COLOR, new RGB(0,0,255));
 		PreferenceConverter.setDefault(store, SML_COMMENT_COLOR, new RGB(0,128,0));
+		setupRainbowParenDefaults(store);
 		store.setDefault(SML_TAB_WIDTH, 2);
 		store.setDefault(SML_MARK_ERRORS, true);
+	}
+
+	private void setupRainbowParenDefaults(IPreferenceStore store) {
+		List<String> keys = getRainbowParenStrings();
+		for (int i = 0; i < keys.size(); i++) {
+			PreferenceConverter.setDefault(store, keys.get(i), SML_RAINBOW_PAREN_DEFAULTS[i]);
+		}
+	}
+
+	public static final List<String> getRainbowParenStrings() {
+		List<String> rtn = new ArrayList<String>();
+		for (int i = 0; i < SML_RAINBOW_PAREN_COUNT; i++) {
+			rtn.add(SML_RAINBOW_PAREN + i);
+		}
+		return rtn;
 	}
 
 	/**

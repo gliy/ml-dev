@@ -8,8 +8,11 @@ import in.iitd.mldev.ui.text.SingleTokenScanner;
 import in.iitd.mldev.ui.text.SmlTextStyleScanner;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
+import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
@@ -51,9 +54,6 @@ public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration 
 		SmlTextStyleProvider styleProvider = new SmlTextStyleProvider();
         
 		DefaultDamagerRepairer damageRepairer;
-		damageRepairer = new DefaultDamagerRepairer(new SmlTextStyleScanner(styleProvider.getKeywordStyle()));
-		reconciler.setDamager(damageRepairer, IDocument.DEFAULT_CONTENT_TYPE);
-		reconciler.setRepairer(damageRepairer, IDocument.DEFAULT_CONTENT_TYPE);
         
 		damageRepairer = new DefaultDamagerRepairer(new SingleTokenScanner(styleProvider.getCommentStyle()));
 		reconciler.setDamager(damageRepairer, SmlTokenTypes.COMMENT);
@@ -67,9 +67,22 @@ public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration 
 		reconciler.setDamager(damageRepairer, SmlTokenTypes.CHAR);
 		reconciler.setRepairer(damageRepairer, SmlTokenTypes.CHAR);
         
+		damageRepairer = new DefaultDamagerRepairer(new SmlTextStyleScanner(styleProvider.getKeywordStyle(), styleProvider.getRainbowParensStyle()));
+		reconciler.setDamager(damageRepairer, IDocument.DEFAULT_CONTENT_TYPE);
+		reconciler.setRepairer(damageRepairer, IDocument.DEFAULT_CONTENT_TYPE);
+		
 		return reconciler;
     }
     
+	@Override
+	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+		ContentAssistant assistant = new ContentAssistant();
+		assistant.setContentAssistProcessor(new SMLContentAssistProcessor(editor), IDocument.DEFAULT_CONTENT_TYPE);
+		//assistant.enableAutoActivation(true);
+		return assistant;
+	}
+	
+	
 	/** Returns the width that a tab character should be displayed with. */
     public int getTabWidth (ISourceViewer viewer) {
     	return SmlUiPlugin.getDefault().getPreferenceStore().getInt(SmlUiPlugin.SML_TAB_WIDTH);
@@ -82,4 +95,9 @@ public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration 
     	return reconciler;
     }
 
+    @Override
+    public IQuickAssistAssistant getQuickAssistAssistant(
+    		ISourceViewer sourceViewer) {
+    	return super.getQuickAssistAssistant(sourceViewer);
+    }
 }

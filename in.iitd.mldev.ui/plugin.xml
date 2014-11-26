@@ -27,5 +27,58 @@
            id="in.iitd.mldev.ui.SmlMainPreferencePage">
      </page>
   </extension>
+  <extension
+        point="org.eclipse.ui.commands">
+  </extension>
+  <extension
+        point="org.eclipse.ui.bindings">
+     <key
+           commandId="in.iitd.mldev.ui.openDeclaration"
+           contextId="in.iitd.mldev.ui.editor.context"
+           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+           sequence="F3">
+     </key>
+     <key
+           commandId="in.iitd.mldev.ui.quickOutline"
+           contextId="in.iitd.mldev.ui.editor.context"
+           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+           sequence="CTRL O">
+     </key>
+  </extension>
+  <extension
+        point="org.eclipse.ui.handlers">
+     <handler
+           class="in.iitd.mldev.ui.handler.SMLOpenDeclarationHandler"
+           commandId="in.iitd.mldev.ui.openDeclaration">
+     </handler>
+     <handler
+           commandId="in.iitd.mldev.ui.quickOutlineHandler">
+     </handler>
+  </extension>
+  <extension
+        point="org.eclipse.ui.commands">
+     <command
+           categoryId="in.iitd.mldev.ui.keyBindings"
+           id="in.iitd.mldev.ui.openDeclaration"
+           name="Open Declaration Command">
+     </command>
+     <category
+           id="in.iitd.mldev.ui.keyBindings"
+           name="SML">
+     </category>
+     <command
+           categoryId="in.iitd.mldev.ui.keyBindings"
+           id="in.iitd.mldev.ui.quickOutline"
+           name="Quick Outline">
+     </command>
+  </extension>
+  <extension
+        point="org.eclipse.ui.contexts">
+     <context
+           id="in.iitd.mldev.ui.editor.context"
+           name="Eeditor Context"
+           parentId="org.eclipse.ui.contexts.window">
+     </context>
+  </extension>
 
 </plugin>
