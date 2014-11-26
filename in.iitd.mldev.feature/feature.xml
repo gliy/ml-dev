@@ -5,7 +5,7 @@
       version="1.0.0.qualifier"
       provider-name="%providerName">
 
-   <description url="http://github.com/andriusvelykis/ml-dev">
+   <description url="http://github.com/gliy/ml-dev">
       %description
    </description>
 
@@ -18,7 +18,7 @@
    </license>
 
    <url>
-      <update label="%updateSiteName" url="http://andriusvelykis.github.io/ml-dev/updates/nightly/"/>
+      <update label="%updateSiteName" url="http://gliy.github.io/ml-dev/updates/nightly/"/>
    </url>
 
    <plugin
