@@ -138,14 +138,14 @@ public class SMLContentAssistProcessor implements IContentAssistProcessor {
 			return rtn;
 		}
 
-		private List<ICompletionProposal> parseExp( Exp exp) {
-			if(exp instanceof LetExp) {
-				return parseLetExp(((LetExp)exp));
+		private List<ICompletionProposal> parseExp(Exp exp) {
+			if (exp instanceof LetExp) {
+				return parseLetExp(((LetExp) exp));
 			} else if (exp instanceof CaseExp) {
-				
+
 			} else if (exp instanceof FlatAppExp) {
 				List<ICompletionProposal> rtn = list();
-				for (Exp childExp : ((FlatAppExp)exp).exps) {
+				for (Exp childExp : ((FlatAppExp) exp).exps) {
 					rtn.addAll(parseExp(childExp));
 				}
 				return rtn;
@@ -165,8 +165,9 @@ public class SMLContentAssistProcessor implements IContentAssistProcessor {
 			return list();
 		}
 
-		private List<ICompletionProposal> parseValDec( ValDec dec) {
-			return list( createProposal(((VarPat)((FlatConPat)dec.bindings.get(0).pat).pats.get(0)).ident.name));
+		private List<ICompletionProposal> parseValDec(ValDec dec) {
+			return list(createProposal(((VarPat) ((FlatConPat) dec.bindings
+					.get(0).pat).pats.get(0)).ident.name));
 		}
 		
 		private ICompletionProposal createProposal( String name) {
