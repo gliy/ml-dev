@@ -16,6 +16,8 @@ import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
+import org.eclipse.jface.text.source.DefaultAnnotationHover;
+import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 
@@ -46,6 +48,12 @@ public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration 
 		return SmlCorePlugin.SML_PARTITIONING;
 	}
 	
+	@Override
+	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+		return new DefaultAnnotationHover();
+	}
+	
+	
 	/** Returns a presentation reconciler for performing syntax highlighting. */
 	public IPresentationReconciler getPresentationReconciler (ISourceViewer viewer) {
 		PresentationReconciler reconciler = new PresentationReconciler();
@@ -66,6 +74,14 @@ public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration 
 		damageRepairer = new DefaultDamagerRepairer(new SingleTokenScanner(styleProvider.getStringStyle()));
 		reconciler.setDamager(damageRepairer, SmlTokenTypes.CHAR);
 		reconciler.setRepairer(damageRepairer, SmlTokenTypes.CHAR);
+		
+		damageRepairer = new DefaultDamagerRepairer(new SingleTokenScanner(styleProvider.getIntegerStyle()));
+		reconciler.setDamager(damageRepairer, SmlTokenTypes.INT);
+		reconciler.setRepairer(damageRepairer, SmlTokenTypes.INT);
+		
+		damageRepairer = new DefaultDamagerRepairer(new SingleTokenScanner(styleProvider.getRealStyle()));
+		reconciler.setDamager(damageRepairer, SmlTokenTypes.REAL);
+		reconciler.setRepairer(damageRepairer, SmlTokenTypes.REAL);
         
 		damageRepairer = new DefaultDamagerRepairer(new SmlTextStyleScanner(styleProvider.getKeywordStyle(), styleProvider.getRainbowParensStyle()));
 		reconciler.setDamager(damageRepairer, IDocument.DEFAULT_CONTENT_TYPE);
@@ -77,7 +93,7 @@ public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration 
 	@Override
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 		ContentAssistant assistant = new ContentAssistant();
-		assistant.setContentAssistProcessor(new SMLContentAssistProcessor(editor), IDocument.DEFAULT_CONTENT_TYPE);
+		assistant.setContentAssistProcessor(new SmlContentAssistProcessor(editor), IDocument.DEFAULT_CONTENT_TYPE);
 		//assistant.enableAutoActivation(true);
 		return assistant;
 	}
@@ -95,6 +111,7 @@ public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration 
     	return reconciler;
     }
 
+    
     @Override
     public IQuickAssistAssistant getQuickAssistAssistant(
     		ISourceViewer sourceViewer) {

@@ -1,5 +1,6 @@
 package in.iitd.mldev.ui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.MissingResourceException;
@@ -8,6 +9,8 @@ import java.util.ResourceBundle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
+import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -31,7 +34,8 @@ public class SmlUiPlugin extends AbstractUIPlugin {
 	public static final String SML_STRING_COLOR = "in.iitd.mldev.smlStringColor";
 	/** Color attribute for the color for comments in syntax highlighting. */
 	public static final String SML_COMMENT_COLOR = "in.iitd.mldev.smlCommentColor";
-
+	public static final String SML_INT_COLOR = "in.iitd.mldev.smlIntColor";
+	public static final String SML_REAL_COLOR = "in.iitd.mldev.smlRealColor";
 	/** Integer attribute for the tab width. */
 	public static final String SML_TAB_WIDTH = "in.iitd.mldev.smlTabWidth";
 	/** Boolean attribute for whether to mark syntax errors in the editor. */
@@ -49,9 +53,12 @@ public class SmlUiPlugin extends AbstractUIPlugin {
 		new RGB(237,230,14),
 		new RGB(219,77,207),
 	};
+
+	public static final String TEMPLATE_KEY = "in.iitd.mldev.templatestore";
 	//Resource bundle.
 	private ResourceBundle resourceBundle;
-
+	private ContributionContextTypeRegistry registry;
+	private ContributionTemplateStore store;
 
 	/**
 	 * The constructor.
@@ -98,6 +105,8 @@ public class SmlUiPlugin extends AbstractUIPlugin {
 		PreferenceConverter.setDefault(store, SML_KEYWORD_COLOR, new RGB(128,0,128));
 		PreferenceConverter.setDefault(store, SML_STRING_COLOR, new RGB(0,0,255));
 		PreferenceConverter.setDefault(store, SML_COMMENT_COLOR, new RGB(0,128,0));
+		PreferenceConverter.setDefault(store, SML_INT_COLOR, new RGB(128,128,0));
+		PreferenceConverter.setDefault(store, SML_REAL_COLOR, new RGB(128,128,50));
 		setupRainbowParenDefaults(store);
 		store.setDefault(SML_TAB_WIDTH, 2);
 		store.setDefault(SML_MARK_ERRORS, true);
@@ -136,6 +145,28 @@ public class SmlUiPlugin extends AbstractUIPlugin {
 	 */
 	public ResourceBundle getResourceBundle () {
 		return resourceBundle;
+	}
+	
+	public ContributionContextTypeRegistry getRegistry() {
+		if(registry == null) {
+			registry = new ContributionContextTypeRegistry();
+			registry.addContextType("in.iitd.mldev.ui.SMLContextType");
+		}
+		return registry;
+	}
+	
+	public ContributionTemplateStore getTemplateStore() {
+		if(store == null) {
+			store = new ContributionTemplateStore(getRegistry(), getPreferenceStore(), 
+					SmlUiPlugin.TEMPLATE_KEY);
+			try {
+				store.load();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return store;
 	}
 
 }

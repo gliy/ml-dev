@@ -25,7 +25,7 @@ import org.eclipse.jface.text.rules.Token;
 public class SmlPartitionScanner extends BufferedRuleBasedScanner implements IPartitionTokenScanner {
 
 	public static final String[] CONTENT_TYPES = new String[] {IDocument.DEFAULT_CONTENT_TYPE, 
-		SmlTokenTypes.STRING, SmlTokenTypes.COMMENT, SmlTokenTypes.CHAR};
+		SmlTokenTypes.STRING, SmlTokenTypes.COMMENT, SmlTokenTypes.CHAR, SmlTokenTypes.INT, SmlTokenTypes.REAL};
 	
 	/** Creates and initializes a new partition scanner. */
 	public SmlPartitionScanner () {
@@ -33,7 +33,8 @@ public class SmlPartitionScanner extends BufferedRuleBasedScanner implements IPa
 		IRule commentRule = new SmlCommentRule(new Token(SmlTokenTypes.COMMENT));
 		IRule stringRule = new SmlStringRule(new Token(SmlTokenTypes.STRING));
 		IRule charRule = new SmlCharRule(new Token(SmlTokenTypes.CHAR));
-		setRules(new IRule[] {commentRule, charRule, stringRule});
+		IRule intRule = new SmlNumericRule(new Token(SmlTokenTypes.INT), new Token(SmlTokenTypes.REAL));
+		setRules(new IRule[] {commentRule, charRule, stringRule, intRule});
 	}
 	
 	public void setPartialRange (IDocument document, int offset, int length, String contentType, int partitionOffset) {

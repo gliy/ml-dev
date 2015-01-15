@@ -1,0 +1,49 @@
+Standard ML of New Jersey v110.74 [built: Tue Jan 31 16:19:10 2012]
+[opening ast.sml]
+datatype binaryOperator
+  = BOP_AND
+  | BOP_COMMA
+  | BOP_DIVIDE
+  | BOP_EQ
+  | BOP_GE
+  | BOP_GT
+  | BOP_LE
+  | BOP_LT
+  | BOP_MINUS
+  | BOP_MOD
+  | BOP_NE
+  | BOP_OR
+  | BOP_PLUS
+  | BOP_TIMES
+datatype unaryOperator = UOP_MINUS | UOP_NOT | UOP_TYPEOF
+datatype declaration = DECL_ID of {id:string} | DECL_INIT of {id:string, src:expression}
+datatype expression = EXP_ANON of {body:sourceElement list, params:string list}
+  | EXP_ASSIGN of {lhs:expression, rhs:expression}
+  | EXP_BINARY of {lft:expression, opr:binaryOperator, rht:expression}
+  | EXP_CALL of {args:expression list, func:expression}
+  | EXP_COND of {elseExp:expression, guard:expression, thenExp:expression}
+  | EXP_DOT of {id:string, lft:expression}
+  | EXP_FALSE
+  | EXP_FUNC of {body:sourceElement list, name:string, params:string list}
+  | EXP_ID of string
+  | EXP_NEW of {args:expression list, ctorExp:expression}
+  | EXP_NUM of int
+  | EXP_OBJ of {props:{exp:expression, id:string} list}
+  | EXP_STRING of string
+  | EXP_THIS
+  | EXP_TRUE
+  | EXP_UNARY of {opnd:expression, opr:unaryOperator}
+  | EXP_UNDEFINED
+datatype statement
+  = ST_BLOCK of {stmts:statement list}
+  | ST_EXP of {exp:expression}
+  | ST_IF of {el:statement, guard:expression, th:statement}
+  | ST_PRINT of {exp:expression}
+  | ST_RETURN of {exp:expression}
+  | ST_VAR of {decls:declaration list}
+  | ST_WHILE of {body:statement, guard:expression}
+datatype sourceElement
+  = FUNC_DECL of {body:sourceElement list, name:string, params:string list}
+  | STMT of {stmt:statement}
+datatype program = PROGRAM of {elems:sourceElement list}
+- - 

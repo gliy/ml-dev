@@ -3,8 +3,12 @@ package in.iitd.mldev.ui.editor;
 import in.iitd.mldev.core.model.ISmlProgramListener;
 import in.iitd.mldev.core.model.SmlBinding;
 import in.iitd.mldev.core.model.SmlProgram;
+import in.iitd.mldev.launch.background.SmlLineOutput;
+import in.iitd.mldev.launch.background.SmlLineOutput.SmlErrorOutput;
 import in.iitd.mldev.ui.SmlUiPlugin;
 import in.iitd.mldev.ui.editor.outline.SmlContentOutlinePage;
+import in.iitd.mldev.ui.handler.SmlParseHandler;
+import in.iitd.mldev.ui.ruler.SmlRuler;
 import in.iitd.mldev.ui.text.SmlBracketMatcher;
 
 import java.util.HashMap;
@@ -15,8 +19,12 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.source.AnnotationRulerColumn;
+import org.eclipse.jface.text.source.CompositeRuler;
+import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.editors.text.EditorsUI;
@@ -24,22 +32,26 @@ import org.eclipse.ui.editors.text.TextEditor;
 import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 /** The SML editor. */
 public class SmlEditor extends TextEditor implements ISmlProgramListener {
+    public static SmlEditor editor;
     
 	/** The content outline page shown in the Outline view. */
     private SmlContentOutlinePage outlinePage;
     /** The high-level model of the program in the editor. */
 	private SmlProgram program;
 
+	private IAnnotationModel annotationModel;
 	/** Called by Eclipse to initialize the editor. Sets the editor to use
 	 * the SML UI plug-in's preference store, and configures its syntax
 	 * highlighting, tab width, etc. See SmlSourceViewerConfiguration. */
 	protected void initializeEditor () {
+		this.editor = this;
 		super.initializeEditor();
 		setPreferenceStore(new ChainedPreferenceStore(new IPreferenceStore[] {
 				SmlUiPlugin.getDefault().getPreferenceStore(),
@@ -48,8 +60,17 @@ public class SmlEditor extends TextEditor implements ISmlProgramListener {
         setRangeIndicator(new DefaultRangeIndicator());
         showOverviewRuler();
         setKeyBindingScopes(new String[]{"in.iitd.mldev.ui.editor.context"});
+        this.annotationModel = new SmlRuler();
 	}
+	
 
+	@Override
+	protected CompositeRuler createCompositeRuler() {
+		CompositeRuler ruler= super.createCompositeRuler();
+		ruler.setModel(annotationModel);
+		ruler.addDecorator(1, new AnnotationRulerColumn(5));
+		return ruler;
+	}
 	/** Returns this editor's outline page if requested. (This is how
 	 * Eclipse gets the outline from the editor.) If the request is for
 	 * something else, passes it on to the superclass. */
@@ -95,6 +116,10 @@ public class SmlEditor extends TextEditor implements ISmlProgramListener {
 			addErrorMarkers(program);
 	}
 	
+	public void programChanged() {
+		programChanged(program);
+	}
+	
 	/** Removes all error markers from the editor's document. */
 	private void removeErrorMarkers () {
 		if (!(getEditorInput() instanceof IFileEditorInput)) return;
@@ -120,9 +145,32 @@ public class SmlEditor extends TextEditor implements ISmlProgramListener {
 				attributes.put(IMarker.TRANSIENT, Boolean.TRUE);
 				MarkerUtilities.createMarker(file, attributes, IMarker.PROBLEM);
 			}
-		} catch (CoreException e) {e.printStackTrace();}
+			if(SmlParseHandler.getOutput() != null) {
+				for (SmlLineOutput err : SmlParseHandler.getOutput().getErrors()) {
+					int startCol = err.getStartCol() - 1;
+					int line = program.getDocument().getLineOffset(err.getStartLine() - 1);
+					int endLine = err.getEndLine() == null ? line : 
+						program.getDocument().getLineOffset(err.getEndLine() - 1);
+					int endCol = err.getEndCol() == null ? 
+							endLine + program.getDocument().getLineLength(err.getStartLine() -1) - startCol
+							: endLine + err.getEndCol();
+					int sev = err instanceof SmlErrorOutput ? IMarker.SEVERITY_ERROR : IMarker.SEVERITY_WARNING;
+					Map<String, Object> attributes = new HashMap<String, Object>();
+					attributes.put(IMarker.MESSAGE, err.getErrorMessage());
+					attributes.put(IMarker.CHAR_START, new Integer(line + startCol));
+					attributes.put(IMarker.CHAR_END, new Integer(endCol));
+					attributes.put(IMarker.SEVERITY, new Integer(sev));
+					attributes.put(IMarker.LINE_NUMBER, err.getStartLine());
+					attributes.put(IMarker.TRANSIENT, Boolean.TRUE);
+					MarkerUtilities.createMarker(file, attributes, IMarker.PROBLEM);
+				}
+			}
+		} catch (CoreException e) {e.printStackTrace();} catch (BadLocationException e) {
+			e.printStackTrace();
+		}
 	}
 
+	
 	/** Called when the cursor position changes. Selects the binding at that
 	 * position in the outline page. */
 	protected void handleCursorPositionChanged () {

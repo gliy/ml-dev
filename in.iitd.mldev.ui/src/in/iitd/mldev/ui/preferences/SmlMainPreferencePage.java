@@ -27,6 +27,8 @@ public class SmlMainPreferencePage extends FieldEditorPreferencePage implements 
 		addField(new ColorFieldEditor(SmlUiPlugin.SML_KEYWORD_COLOR, "Keyword colour:", getFieldEditorParent()));
 		addField(new ColorFieldEditor(SmlUiPlugin.SML_STRING_COLOR, "String colour:", getFieldEditorParent()));
 		addField(new ColorFieldEditor(SmlUiPlugin.SML_COMMENT_COLOR, "Comment colour:", getFieldEditorParent()));
+		addField(new ColorFieldEditor(SmlUiPlugin.SML_INT_COLOR, "Integer colour:", getFieldEditorParent()));
+		addField(new ColorFieldEditor(SmlUiPlugin.SML_REAL_COLOR, "Real colour:", getFieldEditorParent()));
 		addField(new IntegerFieldEditor(SmlUiPlugin.SML_TAB_WIDTH, "Tab width:", getFieldEditorParent()));
 		addField(new BooleanFieldEditor(SmlUiPlugin.SML_MARK_ERRORS, "Mark syntax errors in editor", getFieldEditorParent()));
 	}

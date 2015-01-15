@@ -1,0 +1,270 @@
+Standard ML of New Jersey v110.74 [built: Tue Jan 31 16:19:10 2012]
+[opening interpreter.sml]
+[opening printAST.sml]
+[opening parser.sml]
+[autoloading]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[autoloading done]
+opening TextIO
+[opening tokenizer.sml]
+opening TextIO
+val OPTIONAL = true : bool
+exception InvalidSymbol of string
+exception InvalidNumber of string
+exception InvalidString
+exception UnterminatedString
+exception InvalidEscapeSequence of string
+datatype token = TK_AND | TK_ASSIGN | TK_COLON | TK_COMMA | TK_DIVIDE | TK_DOT | TK_ELSE | TK_EOF | TK_EQ | TK_FALSE | TK_FUNCTION | TK_GE | TK_GT | TK_ID of string | TK_IF | TK_LBRACE | TK_LBRACKET | TK_LE | TK_LPAREN | TK_LT | TK_MINUS | TK_MOD | TK_NE | TK_NEW | TK_NOT | TK_NUM of int | TK_OR | TK_PLUS | TK_PRINT | TK_QUESTION | TK_RBRACE | TK_RBRACKET | TK_RETURN | TK_RPAREN | TK_SEMI | TK_STRING of string | TK_THIS | TK_TIMES | TK_TRUE | TK_TYPEOF | TK_UNDEFINED | TK_VAR | TK_WHILE
+val keywordTokens = [("else",TK_ELSE),("false",TK_FALSE),("function",TK_FUNCTION),("if",TK_IF),("new",TK_NEW),("print",TK_PRINT),("return",TK_RETURN),("this",TK_THIS),("true",TK_TRUE),("typeof",TK_TYPEOF),("undefined",TK_UNDEFINED),("var",TK_VAR),...] : (string * token) list
+val symbolTokens = [("{",TK_LBRACE),("}",TK_RBRACE),("(",TK_LPAREN),(")",TK_RPAREN),("[",TK_LBRACKET),("]",TK_RBRACKET),(",",TK_COMMA),(";",TK_SEMI),("?",TK_QUESTION),(":",TK_COLON),(".",TK_DOT),("+",TK_PLUS),...] : (string * token) list
+[autoloading]
+[autoloading done]
+val error = fn : vector -> 'a
+[autoloading]
+[autoloading done]
+tokenizer.sml:108.44 Warning: calling polyEqual
+val member = fn : ''a -> ''a list -> bool
+tokenizer.sml:111.37 Warning: calling polyEqual
+val pairLookup = fn : ''a -> (''a * 'b) list -> 'b option
+tokenizer.sml:117.37 Warning: calling polyEqual
+val pairLookupReverse = fn : ''a -> ('b * ''a) list -> 'b option
+[autoloading]
+[autoloading done]
+val clearWhitespace = fn : instream -> instream
+val buildToken = fn : instream -> (char -> bool) -> char list -> string
+val outputIdentifier = fn : string -> token
+[autoloading]
+[autoloading done]
+val outputNumber = fn : string -> token
+val outputString = fn : string -> token
+val outputSymbol = fn : string -> token
+val recognizeIdentifier = fn : instream -> string
+val recognizeNumber = fn : instream -> string
+val escapeSequenceList = [(#"\"",#"\""),(#"\\",#"\\"),(#"b",#"\b"),(#"f",#"\f"),(#"n",#"\n"),(#"r",#"\r"),(#"t",#"\t"),(#"v",#"\v")] : (char * char) list
+val buildEscapeCharacter = fn : instream -> char
+val buildString = fn : instream -> char list -> string
+val recognizeString = fn : instream -> string
+val buildSymbol = fn : elem list -> bool -> instream -> string -> string
+val symbolBuildList = [(#"{",fn),(#"}",fn),(#"(",fn),(#")",fn),(#"[",fn),(#"]",fn),(#",",fn),(#";",fn),(#"?",fn),(#":",fn),(#".",fn),(#"+",fn),...] : (char * (instream -> string -> string)) list
+val recognizeSymbol = fn : instream -> string
+val recognizeFirstToken = fn : instream -> token
+val nextToken = fn : instream -> token
+val allTokens = [("{",TK_LBRACE),("}",TK_RBRACE),("(",TK_LPAREN),(")",TK_RPAREN),("[",TK_LBRACKET),("]",TK_RBRACKET),(",",TK_COMMA),(";",TK_SEMI),("?",TK_QUESTION),(":",TK_COLON),(".",TK_DOT),("+",TK_PLUS),...] : (string * token) list
+[autoloading]
+[autoloading done]
+val tkString = fn : token -> string
+val it = () : unit
+[opening ast.sml]
+datatype binaryOperator = BOP_AND | BOP_COMMA | BOP_DIVIDE | BOP_EQ | BOP_GE | BOP_GT | BOP_LE | BOP_LT | BOP_MINUS | BOP_MOD | BOP_NE | BOP_OR | BOP_PLUS | BOP_TIMES
+datatype unaryOperator = UOP_MINUS | UOP_NOT | UOP_TYPEOF
+datatype declaration = DECL_ID of {id:string} | DECL_INIT of {id:string, src:expression}
+datatype expression = EXP_ANON of {body:sourceElement list, params:string list} | EXP_ASSIGN of {lhs:expression, rhs:expression} | EXP_BINARY of {lft:expression, opr:binaryOperator, rht:expression} | EXP_CALL of {args:expression list, func:expression} | EXP_COND of {elseExp:expression, guard:expression, thenExp:expression} | EXP_DOT of {id:string, lft:expression} | EXP_FALSE | EXP_FUNC of {body:sourceElement list, name:string, params:string list} | EXP_ID of string | EXP_NEW of {args:expression list, ctorExp:expression} | EXP_NUM of int | EXP_OBJ of {props:{exp:expression, id:string} list} | EXP_STRING of string | EXP_THIS | EXP_TRUE | EXP_UNARY of {opnd:expression, opr:unaryOperator} | EXP_UNDEFINED
+datatype statement = ST_BLOCK of {stmts:statement list} | ST_EXP of {exp:expression} | ST_IF of {el:statement, guard:expression, th:statement} | ST_PRINT of {exp:expression} | ST_RETURN of {exp:expression} | ST_VAR of {decls:declaration list} | ST_WHILE of {body:statement, guard:expression}
+datatype sourceElement = FUNC_DECL of {body:sourceElement list, name:string, params:string list} | STMT of {stmt:statement}
+datatype program = PROGRAM of {elems:sourceElement list}
+val it = () : unit
+val err_expect = fn : string -> string -> 'a
+val someifyFirst = fn : 'a * 'b -> 'a option * 'b
+val match_id = fn : instream -> token -> string * token
+val matchOptionalId = fn : instream -> token -> string option * token
+val match_num = fn : instream -> token -> int * token
+val match_string = fn : instream -> token -> string * token
+val match_tk = fn : instream -> token -> token -> token
+val match_eof = fn : 'a -> token -> token
+parser.sml:43.49 Warning: calling polyEqual
+val findPair = fn : ''a -> (''a * 'b) list -> (''a * 'b) option
+val inOps = fn : ''a -> (''a * 'b) list -> bool
+val eqOps = [(TK_EQ,BOP_EQ),(TK_NE,BOP_NE)] : (token * binaryOperator) list
+val relOps = [(TK_LT,BOP_LT),(TK_GT,BOP_GT),(TK_LE,BOP_LE),(TK_GE,BOP_GE)] : (token * binaryOperator) list
+val addOps = [(TK_PLUS,BOP_PLUS),(TK_MINUS,BOP_MINUS)] : (token * binaryOperator) list
+val multOps = [(TK_TIMES,BOP_TIMES),(TK_DIVIDE,BOP_DIVIDE),(TK_MOD,BOP_MOD)] : (token * binaryOperator) list
+val unaryOps = [(TK_NOT,UOP_NOT),(TK_TYPEOF,UOP_TYPEOF),(TK_MINUS,UOP_MINUS)] : (token * unaryOperator) list
+val andOps = [(TK_AND,BOP_AND)] : (token * binaryOperator) list
+val orOps = [(TK_OR,BOP_OR)] : (token * binaryOperator) list
+val commaOps = [(TK_COMMA,BOP_COMMA)] : (token * binaryOperator) list
+val opErrorMsgList = fn : (token * 'a) list -> string list -> string list
+val opErrorMsg = fn : (token * 'a) list -> string
+val isEqOp = fn : token -> bool
+val isRelOp = fn : token -> bool
+val isAddOp = fn : token -> bool
+val isMultOp = fn : token -> bool
+val isUnaryOp = fn : token -> bool
+val isAndOp = fn : token -> bool
+val isOrOp = fn : token -> bool
+val isCommaOp = fn : token -> bool
+val isExpression = fn : token -> bool
+val isAssignmentExpression = fn : token -> bool
+val isExpressionStatement = fn : token -> bool
+val isValidLHS = fn : expression -> bool
+val isStatement = fn : token -> bool
+val isSourceElement = fn : token -> bool
+val parseRepetitionHelper = fn : 'a -> 'b -> ('b -> bool) -> ('a -> 'b -> 'c * 'b) -> 'c list -> 'c list * 'b
+val parseRepetition = fn : 'a -> 'b -> ('b -> bool) -> ('a -> 'b -> 'c * 'b) -> 'c list * 'b
+val parseSeparatedSequence = fn : ('a -> bool) -> ('b -> 'a -> 'c) -> ('b -> 'c -> 'd * 'a) -> 'b -> 'c -> 'd list * 'a
+val parseCommaSeparatedSequence = fn : (instream -> token -> 'a * token) -> instream -> token -> 'a list * token
+val parseOp = fn : instream -> token -> (token * 'a) list -> 'a * token
+val parseEqOp = fn : instream -> token -> binaryOperator * token
+val parseRelOp = fn : instream -> token -> binaryOperator * token
+val parseAddOp = fn : instream -> token -> binaryOperator * token
+val parseMultOp = fn : instream -> token -> binaryOperator * token
+val parseUnaryOp = fn : instream -> token -> unaryOperator * token
+val parseAndOp = fn : instream -> token -> binaryOperator * token
+val parseOrOp = fn : instream -> token -> binaryOperator * token
+val parseCommaOp = fn : instream -> token -> binaryOperator * token
+val parseBinaryExpLeft = fn : 'a -> 'b -> ('a -> 'b -> expression * 'c) -> ('c -> bool) -> ('a -> 'c -> binaryOperator * 'b) -> expression * 'c
+val parseParameterList = fn : instream -> token -> string list * token
+val parseExpression = fn : instream -> token -> expression * token
+val parseAssignmentExpression = fn : instream -> token -> expression * token
+val parseConditionalExpression = fn : instream -> token -> expression * token
+val parseLogicalOrExpression = fn : instream -> token -> expression * token
+val parseLogicalAndExpression = fn : instream -> token -> expression * token
+val parseEqualityExpression = fn : instream -> token -> expression * token
+val parseRelationalExpression = fn : instream -> token -> expression * token
+val parseAdditiveExpression = fn : instream -> token -> expression * token
+val parseMultiplicativeExpression = fn : instream -> token -> expression * token
+val parseUnaryExpression = fn : instream -> token -> expression * token
+val parseLeftHandSideExpression = fn : instream -> token -> expression * token
+val parseCallExpression = fn : instream -> token -> expression * token
+val parseMemberExpression = fn : instream -> token -> expression * token
+val parsePrimaryExpression = fn : instream -> token -> expression * token
+val parseOptionalArguments = fn : instream -> token -> expression -> expression * token
+val parseOptionalIdArgs = fn : instream -> token -> expression -> expression * token
+val parseArguments = fn : instream -> token -> expression list * token
+val parseArgumentList = fn : instream -> token -> expression list * token
+val parseDotSequence = fn : instream -> token -> expression -> expression * token
+val parseOptionalPropertyAssignments = fn : instream -> token -> {exp:expression, id:string} list * token
+val parsePropertyAssignment = fn : instream -> token -> {exp:expression, id:string} * token
+val parseExpressionStatement = fn : instream -> token -> statement * token
+val parseStatement = fn : instream -> token -> statement * token
+val parseBlockStatement = fn : instream -> token -> statement * token
+val parseIfStatement = fn : instream -> token -> statement * token
+val parseElse = fn : instream -> token -> statement * token
+val parsePrintStatement = fn : instream -> token -> statement * token
+val parseWhileStatement = fn : instream -> token -> statement * token
+val parseVariableStatement = fn : instream -> token -> statement * token
+val parseReturnStatement = fn : instream -> token -> statement * token
+val parseVariableDeclarationList = fn : instream -> token -> declaration list * token
+val parseVariableDeclaration = fn : instream -> token -> declaration * token
+val parseOptionalInitializer = fn : instream -> token -> string -> declaration * token
+val parseFunctionDeclaration = fn : instream -> token -> sourceElement * token
+val parseSourceElement = fn : instream -> token -> sourceElement * token
+val parseSourceElements = fn : instream -> token -> sourceElement list * token
+val parseProgram = fn : instream -> token -> program
+val parseStream = fn : instream -> program
+val parse = fn : string -> program
+val it = () : unit
+val out = fn : vector -> unit
+val binaryOperatorString = fn : binaryOperator -> string
+val unaryOperatorString = fn : unaryOperator -> string
+val expressionString = fn : expression -> string
+val propertiesString = fn : {exp:expression, id:string} list -> string
+val propertyString = fn : {exp:expression, id:string} -> string
+val argumentsString = fn : expression list -> string
+val statementString = fn : statement -> string
+val funcString = fn : string option -> string list -> sourceElement list -> string
+val parametersString = fn : string list -> string
+val declarationsString = fn : declaration list -> string
+val declString = fn : declaration -> string
+val sourceElementString = fn : sourceElement -> string
+val sourceElementsString = fn : sourceElement list -> string
+val printAST = fn : program -> unit
+val it = () : unit
+[opening map.sml]
+exception UndefinedIdentifier
+val initial_size = 127 : int
+[autoloading]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[autoloading done]
+val contains = fn : ('a,'b) HashTable.hash_table -> 'a -> bool
+val lookup = fn : ('a,'b) HashTable.hash_table -> 'a -> 'b
+val insert = fn : ('a,'b) HashTable.hash_table -> 'a -> 'b -> ('a,'b) HashTable.hash_table
+[autoloading]
+[autoloading done]
+val new_map = fn : unit -> (string,'a) HashTable.hash_table
+val it = () : unit
+exception MalformedEnvironment
+datatype value = Bool_Value of bool | Closure_Value of {body:sourceElement list, env:(string,value) HashTable.hash_table list, params:string list, parent:value, props:(string,value) HashTable.hash_table, rf:unit ref} | Num_Value of int | Object_Value of {parent:value, props:(string,value) HashTable.hash_table, rf:unit ref} | String_Value of string | Undefined_Value
+val ObjectOrigin = Object_Value {parent=Undefined_Value,props=HT {eq_pred=fn,hash_fn=fn,n_items=ref #,not_found=UndefinedIdentifier(-),table=ref #},rf=ref ()} : value
+val FunctionOrigin = Object_Value {parent=Object_Value {parent=Undefined_Value,props=HT #,rf=ref #},props=HT {eq_pred=fn,hash_fn=fn,n_items=ref #,not_found=UndefinedIdentifier(-),table=ref #},rf=ref ()} : value
+val globalThis = Object_Value {parent=Object_Value {parent=Undefined_Value,props=HT #,rf=ref #},props=HT {eq_pred=fn,hash_fn=fn,n_items=ref #,not_found=UndefinedIdentifier(-),table=ref #},rf=ref ()} : value
+[autoloading]
+[autoloading done]
+val valueToString = fn : value -> string
+val typeString = fn : value -> string
+val check = fn : value -> value
+interpreter.sml:46.5-47.95 Warning: match nonexhaustive
+          (Object_Value {parent=parent,props=props,rf=rf},id,v) => ...
+          (Closure_Value {body=body,env=env,params=params,parent=parent,props=props,rf=rf},id,v) => ...
+  
+val assignInObject = fn : value -> string -> value -> (string,value) HashTable.hash_table
+val createClosureValue = fn : string list -> sourceElement list -> (string,value) HashTable.hash_table list -> value
+val condTypeError = fn : value -> 'a
+val unaryTypeError = fn : value -> value -> unaryOperator -> 'a
+val boolTypeError = fn : value -> binaryOperator -> 'a
+val binaryTypeError = fn : value -> value -> value -> value -> binaryOperator -> 'a
+val addTypeError = fn : value -> value -> binaryOperator -> 'a
+val ifTypeError = fn : value -> 'a
+val whileTypeError = fn : value -> 'a
+val envChain = fn : {chain:'a, retVal:'b} -> 'a
+val envRetVal = fn : {chain:'a, retVal:'b} -> 'b
+val createEnv = fn : 'a -> 'b -> {chain:'a, retVal:'b}
+val atTopLevel = fn : {chain:'a list, retVal:'b} -> bool
+val insertCurrent = fn : {chain:('a,'b) HashTable.hash_table list, retVal:'c} -> 'a -> 'b -> {chain:('a,'b) HashTable.hash_table list, retVal:'c}
+val declareCurrent = fn : {chain:('a,value) HashTable.hash_table list, retVal:'b} -> 'a -> {chain:('a,value) HashTable.hash_table list, retVal:'b}
+val insertEnvH = fn : ('a,'b) HashTable.hash_table list -> 'a -> 'b -> ('a,'b) HashTable.hash_table
+val insertEnv = fn : {chain:('a,'b) HashTable.hash_table list, retVal:'c} -> 'a -> 'b -> {chain:('a,'b) HashTable.hash_table list, retVal:'c}
+val lookupEnvH = fn : ('a,'b) HashTable.hash_table list -> 'a -> 'b
+val lookupEnv = fn : {chain:('a,'b) HashTable.hash_table list, retVal:'c} -> 'a -> 'b
+val growEnvironment = fn : {chain:(string,'a) HashTable.hash_table list, retVal:'b} -> {chain:(string,'a) HashTable.hash_table list, retVal:'b}
+interpreter.sml:139.5-153.22 Warning: match nonexhaustive
+          (Object_Value {parent=parent,props=props,rf=rf},id) => ...
+          (Closure_Value {body=body,env=env,params=params,parent=parent,props=props,rf=rf},id) => ...
+  
+val getInObject = fn : value -> string -> value
+val operatorFunc = fn : ('a * 'b -> bool) -> ('a * 'c) list -> 'b -> ('a * 'c) option
+val applyArithOp = fn : binaryOperator -> (int * int -> int) -> value -> value -> value
+val applyDivOp = fn : binaryOperator -> (int * int -> int) -> value -> value -> value
+val applyRelOp = fn : binaryOperator -> (int * int -> bool) -> value -> value -> value
+val applyAddOp = fn : binaryOperator -> value -> value -> value
+val applyEqualityOp = fn : value -> value -> value
+val applyInequalityOp = fn : value -> value -> value
+val applyCommaOp = fn : 'a -> 'b -> 'b
+val applyEagerBoolOp = fn : binaryOperator -> (bool * bool -> bool) -> value -> value -> value
+val applyEagerAndOp = fn : binaryOperator -> value -> value -> value
+val applyEagerOrOp = fn : binaryOperator -> value -> value -> value
+val binaryFuncs = [(BOP_PLUS,fn),(BOP_MINUS,fn),(BOP_TIMES,fn),(BOP_DIVIDE,fn),(BOP_MOD,fn),(BOP_EQ,fn),(BOP_NE,fn),(BOP_LT,fn),(BOP_GT,fn),(BOP_LE,fn),(BOP_GE,fn),(BOP_AND,fn),...] : (binaryOperator * (value -> value -> value)) list
+val binaryOperatorFunc = fn : binaryOperator -> (binaryOperator * (value -> value -> value)) option
+val applyNotOp = fn : unaryOperator -> value -> value
+val applyMinusOp = fn : unaryOperator -> value -> value
+val applyTypeofOp = fn : value -> value
+val unaryFuncs = [(UOP_NOT,fn),(UOP_TYPEOF,fn),(UOP_MINUS,fn)] : (unaryOperator * (value -> value)) list
+val unaryOperatorFunc = fn : unaryOperator -> (unaryOperator * (value -> value)) option
+val objectReturn = fn : value -> value -> value
+val verifyBoolValue = fn : value -> binaryOperator -> value
+val splitSourceElementsH = fn : sourceElement list -> statement list -> {body:sourceElement list, name:string, params:string list} list -> statement list * {body:sourceElement list, name:string, params:string list} list
+val splitSourceElements = fn : sourceElement list -> statement list * {body:sourceElement list, name:string, params:string list} list
+val declareFunctions = fn : {body:sourceElement list, name:string, params:string list} list -> {chain:(string,value) HashTable.hash_table list, retVal:'a} -> {chain:(string,value) HashTable.hash_table list, retVal:'a}
+val declareVars = fn : declaration list -> {chain:(string,value) HashTable.hash_table list, retVal:'a} -> {chain:(string,value) HashTable.hash_table list, retVal:'a}
+val declareVariables = fn : statement list -> {chain:(string,value) HashTable.hash_table list, retVal:'a} -> {chain:(string,value) HashTable.hash_table list, retVal:'a}
+val declareStmtVariables = fn : statement -> {chain:(string,value) HashTable.hash_table list, retVal:'a} -> {chain:(string,value) HashTable.hash_table list, retVal:'a}
+val bindParameters = fn : 'a list -> value list -> {chain:('a,value) HashTable.hash_table list, retVal:'b} -> {chain:('a,value) HashTable.hash_table list, retVal:'b}
+val evalBinary = fn : binaryOperator -> expression -> expression -> {chain:(string,value) HashTable.hash_table list, retVal:value option} -> value
+val evalUnary = fn : unaryOperator -> expression -> {chain:(string,value) HashTable.hash_table list, retVal:value option} -> value
+val insertProps = fn : (string,value) HashTable.hash_table -> (string * value) list -> unit
+val createObject = fn : {exp:expression, id:string} list -> value -> {chain:(string,value) HashTable.hash_table list, retVal:value option} -> value
+val addThis = fn : expression -> {chain:(string,value) HashTable.hash_table list, retVal:value option} -> value * value
+val evalExpression = fn : expression -> {chain:(string,value) HashTable.hash_table list, retVal:value option} -> value
+val evalVariables = fn : declaration list -> {chain:(string,value) HashTable.hash_table list, retVal:value option} -> {chain:(string,value) HashTable.hash_table list, retVal:value option}
+val evalStatement = fn : statement -> {chain:(string,value) HashTable.hash_table list, retVal:value option} -> {chain:(string,value) HashTable.hash_table list, retVal:value option}
+val evalExpStatement = fn : expression -> {chain:(string,value) HashTable.hash_table list, retVal:value option} -> {chain:(string,value) HashTable.hash_table list, retVal:value option}
+val evalIfStatement = fn : expression -> statement -> statement -> {chain:(string,value) HashTable.hash_table list, retVal:value option} -> {chain:(string,value) HashTable.hash_table list, retVal:value option}
+val evalPrintStatement = fn : expression -> {chain:(string,value) HashTable.hash_table list, retVal:value option} -> {chain:(string,value) HashTable.hash_table list, retVal:value option}
+val evalWhileStatement = fn : expression -> statement -> {chain:(string,value) HashTable.hash_table list, retVal:value option} -> {chain:(string,value) HashTable.hash_table list, retVal:value option}
+val evalStatements = fn : statement list -> {chain:(string,value) HashTable.hash_table list, retVal:value option} -> {chain:(string,value) HashTable.hash_table list, retVal:value option}
+interpreter.sml:521.5-521.58 Warning: match nonexhaustive
+          Object_Value {parent=parent,props=props,rf=rf} => ...
+  
+val getGlobalEnv = fn : value -> (string,value) HashTable.hash_table
+val createEnvironment = fn : unit -> {chain:(string,value) HashTable.hash_table list, retVal:'a option}
+val evalProgram = fn : program -> {chain:(string,value) HashTable.hash_table list, retVal:value option}
+val interpret = fn : string -> unit

@@ -22,9 +22,15 @@
   <extension
         point="org.eclipse.ui.preferencePages">
      <page
-           name="SML"
            class="in.iitd.mldev.ui.preferences.SmlMainPreferencePage"
-           id="in.iitd.mldev.ui.SmlMainPreferencePage">
+           id="in.iitd.mldev.ui.SmlMainPreferencePage"
+           name="SML">
+     </page>
+     <page
+           category="in.iitd.mldev.ui.SmlMainPreferencePage"
+           class="in.iitd.mldev.ui.template.SMLTemplatePage"
+           id="in.iitd.mldev.ui.page1"
+           name="SML Templates">
      </page>
   </extension>
   <extension
@@ -42,7 +48,7 @@
            commandId="in.iitd.mldev.ui.quickOutline"
            contextId="in.iitd.mldev.ui.editor.context"
            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-           sequence="CTRL O">
+           sequence="CTRL+O">
      </key>
   </extension>
   <extension
@@ -76,9 +82,57 @@
         point="org.eclipse.ui.contexts">
      <context
            id="in.iitd.mldev.ui.editor.context"
-           name="Eeditor Context"
+           name="Editor Context"
            parentId="org.eclipse.ui.contexts.window">
      </context>
   </extension>
-
+  <extension
+        point="org.eclipse.ui.editors.templates">
+     <contextType
+           class="in.iitd.mldev.ui.template.SMLTemplateContextType"
+           id="in.iitd.mldev.ui.SMLContextType"
+           name="SML"
+           registryId="in.iitd.mldev.ui.SMLContextTypeRegistry">
+     </contextType>
+     <contextTypeRegistry
+           id="in.iitd.mldev.ui.SMLContextTypeRegistry">
+     </contextTypeRegistry>
+     <template
+           autoinsert="true"
+           contextTypeId="in.iitd.mldev.ui.SMLContextType"
+           description="case statement"
+           id="in.iitd.mldev.ui.caseTemplate"
+           name="case">
+        <pattern>
+           case ${VAR} of
+    ${CASE} =&gt; ${ACTION}
+        </pattern>
+     </template>
+  </extension>
+  <extension
+        point="org.eclipse.jdt.core.codeFormatter">
+     <codeFormatter
+           class="in.iitd.mldev.ui.editor.SmlCodeFormatter">
+     </codeFormatter>
+  </extension>
+  <extension
+        point="org.eclipse.ui.workbench.texteditor.rulerColumns">
+     <column
+           class="in.iitd.mldev.ui.ContributedRulerColumn1"
+           enabled="true"
+           global="true"
+           id="in.iitd.mldev.ui.column1"
+           includeInMenu="true">
+        <placement
+              gravity="1.0">
+        </placement>
+     </column>
+  </extension>
+  <extension
+        point="in.iitd.mldev.launch.in.iitd.mldev.launch.parse">
+     <ParseAction
+           class="in.iitd.mldev.ui.handler.SmlParseHandler">
+     </ParseAction>
+  </extension>
+  
 </plugin>

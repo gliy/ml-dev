@@ -14,35 +14,57 @@ import org.eclipse.swt.graphics.RGB;
 /** A utility class to get colours and font styles for syntax highlighting. */
 public class SmlTextStyleProvider {
 
-	private TextAttribute defaultStyle, keywordStyle, stringStyle, commentStyle;
+	private TextAttribute defaultStyle, keywordStyle, stringStyle,
+			commentStyle, integerStyle, realStyle;
 	private TextAttribute[] rainbowParensStyle;
-	/** Creates a new text style provider. Currently, a new provider is
-	 * created for each SML editor. */
-	/* Colour preferences are only read in the constructor, which is why
-	 * editors need to be closed and reopened after changing the colours. */
-	public SmlTextStyleProvider () {
+
+	/**
+	 * Creates a new text style provider. Currently, a new provider is created
+	 * for each SML editor.
+	 */
+	/*
+	 * Colour preferences are only read in the constructor, which is why editors
+	 * need to be closed and reopened after changing the colours.
+	 */
+	public SmlTextStyleProvider() {
 		IPreferenceStore store = SmlUiPlugin.getDefault().getPreferenceStore();
-		RGB keywordColor = PreferenceConverter.getColor(store, SmlUiPlugin.SML_KEYWORD_COLOR);
-		RGB stringColor = PreferenceConverter.getColor(store, SmlUiPlugin.SML_STRING_COLOR);
-		RGB commentColor = PreferenceConverter.getColor(store, SmlUiPlugin.SML_COMMENT_COLOR);
-		keywordStyle = new TextAttribute(new Color(null,keywordColor), null, SWT.BOLD);
-		stringStyle = new TextAttribute(new Color(null,stringColor), null, SWT.NORMAL);
-		commentStyle = new TextAttribute(new Color(null,commentColor), null, SWT.NORMAL);
-		
+		RGB keywordColor = PreferenceConverter.getColor(store,
+				SmlUiPlugin.SML_KEYWORD_COLOR);
+		RGB stringColor = PreferenceConverter.getColor(store,
+				SmlUiPlugin.SML_STRING_COLOR);
+		RGB commentColor = PreferenceConverter.getColor(store,
+				SmlUiPlugin.SML_COMMENT_COLOR);
+		RGB integerColor = PreferenceConverter.getColor(store,
+				SmlUiPlugin.SML_INT_COLOR);
+
+		keywordStyle = new TextAttribute(new Color(null, keywordColor), null,
+				SWT.BOLD);
+		stringStyle = new TextAttribute(new Color(null, stringColor), null,
+				SWT.NORMAL);
+		commentStyle = new TextAttribute(new Color(null, commentColor), null,
+				SWT.NORMAL);
+		integerStyle = new TextAttribute(new Color(null, integerColor), null,
+				SWT.NORMAL);
+		realStyle = new TextAttribute(new Color(null, PreferenceConverter.getColor(store,
+				SmlUiPlugin.SML_REAL_COLOR)), null, SWT.NORMAL);
+
 		List<String> keys = SmlUiPlugin.getRainbowParenStrings();
 		rainbowParensStyle = new TextAttribute[keys.size()];
-		for(int i = 0 ; i <keys.size();i++) {
-			rainbowParensStyle[i] = new TextAttribute(
-					new Color(null, PreferenceConverter.getColor(store, keys.get(i))),
-					null, SWT.BOLD);
+		for (int i = 0; i < keys.size(); i++) {
+			rainbowParensStyle[i] = new TextAttribute(new Color(null,
+					PreferenceConverter.getColor(store, keys.get(i))), null,
+					SWT.BOLD);
 		}
 	}
 
 	/** Disposes the colours allocated in the constructor. */
-	/* "Applications must dispose of all colors which they allocate."
-	 * Unfortunately, this method is never called. */
+	/*
+	 * "Applications must dispose of all colors which they allocate."
+	 * Unfortunately, this method is never called.
+	 */
 	public void dispose() {
-		TextAttribute[] styles = {defaultStyle, keywordStyle, stringStyle, commentStyle};
+		TextAttribute[] styles = { defaultStyle, keywordStyle, stringStyle,
+				commentStyle };
 		for (int i = 0; i < styles.length; i++) {
 			if (styles[i].getBackground() != null)
 				styles[i].getBackground().dispose();
@@ -50,13 +72,29 @@ public class SmlTextStyleProvider {
 				styles[i].getForeground().dispose();
 		}
 	}
-	
+
 	/** Returns the colour and font style for comments in the editor. */
-	public TextAttribute getCommentStyle () {return commentStyle;}
+	public TextAttribute getCommentStyle() {
+		return commentStyle;
+	}
+
 	/** Returns the colour and font style for keywords in the editor. */
-	public TextAttribute getKeywordStyle () {return keywordStyle;}
+	public TextAttribute getKeywordStyle() {
+		return keywordStyle;
+	}
+
 	/** Returns the colour and font style for strings in the editor. */
-	public TextAttribute getStringStyle () {return stringStyle;}
+	public TextAttribute getStringStyle() {
+		return stringStyle;
+	}
+
+	public TextAttribute getIntegerStyle() {
+		return integerStyle;
+	}
+	
+	public TextAttribute getRealStyle() {
+		return realStyle;
+	}
 
 	public TextAttribute[] getRainbowParensStyle() {
 		return rainbowParensStyle;

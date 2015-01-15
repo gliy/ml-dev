@@ -70,6 +70,9 @@ public class SmlProgram {
 		return problems.toArray(new IRegion[0]);
 	}
 	
+	public IDocument getDocument() {
+		return document;
+	}
 	/** Updates the representation of the program. This method should
 	 * be called by the editor when the document is changed. */
 	public void update () {

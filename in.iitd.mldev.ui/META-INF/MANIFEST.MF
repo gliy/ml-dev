@@ -14,6 +14,8 @@ Require-Bundle: org.eclipse.core.resources,
  org.eclipse.ui.ide,
  org.eclipse.ui.views,
  org.eclipse.ui.workbench.texteditor,
- in.iitd.mldev.core;bundle-version="1.0.0"
+ in.iitd.mldev.core;bundle-version="1.0.0",
+ org.eclipse.jdt.core,
+ in.iitd.mldev.launch;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

@@ -1,0 +1,253 @@
+Standard ML of New Jersey v110.74 [built: Tue Jan 31 16:19:10 2012]
+- [autoloading]
+[library $smlnj/compiler/current.cm is stable]
+[library $smlnj/compiler/x86.cm is stable]
+[library $smlnj/viscomp/core.cm is stable]
+[library $smlnj/viscomp/basics.cm is stable]
+[library $smlnj/viscomp/elabdata.cm is stable]
+[library $smlnj/viscomp/elaborate.cm is stable]
+[library $SMLNJ-BASIS/basis.cm is stable]
+[library $smlnj/viscomp/debugprof.cm is stable]
+[library $SMLNJ-LIB/Util/smlnj-lib.cm is stable]
+[library $smlnj/MLRISC/Control.cm is stable]
+[library $SMLNJ-MLRISC/Control.cm is stable]
+[library $controls-lib.cm(=$SMLNJ-LIB/Controls)/controls-lib.cm is stable]
+[library $smlnj/smlnj-lib/controls-lib.cm is stable]
+[autoloading done]
+opening Control
+  structure Print :
+    sig
+      val printDepth : int ref
+      val printLength : int ref
+      val stringDepth : int ref
+      val intinfDepth : int ref
+      val printLoop : bool ref
+      val signatures : int ref
+      val printOpens : bool ref
+      val out : {flush:unit -> unit, say:string -> unit} ref
+      val linewidth : int ref
+      val say : string -> unit
+      val flush : unit -> unit
+    end
+  structure ElabData :
+    sig
+      val saveLvarNames : bool ref
+      val eedebugging : bool ref
+      val mudebugging : bool ref
+      val tudebugging : bool ref
+    end
+  structure Elab :
+    sig
+      val etdebugging : bool ref
+      val esdebugging : bool ref
+      val insdebugging : bool ref
+      val smdebugging : bool ref
+      val ecdebugging : bool ref
+      val emdebugging : bool ref
+      val tcdebugging : bool ref
+      val unidebugging : bool ref
+      val instantiateSigs : bool ref
+      val internals : bool ref
+      val markabsyn : bool ref
+      val boxedconstconreps : bool ref
+      val multDefWarn : bool ref
+      val shareDefError : bool ref
+      val valueRestrictionLocalWarn : bool ref
+      val valueRestrictionTopWarn : bool ref
+      val showTypeErrorCulprits : bool ref
+    end
+  structure MC :
+    sig
+      val printArgs : bool ref
+      val printRet : bool ref
+      val bindNoVariableWarn : bool ref
+      val bindNonExhaustiveWarn : bool ref
+      val bindNonExhaustiveError : bool ref
+      val matchNonExhaustiveWarn : bool ref
+      val matchNonExhaustiveError : bool ref
+      val matchRedundantWarn : bool ref
+      val matchRedundantError : bool ref
+    end
+  structure FLINT :
+    sig
+      val print : bool ref
+      val printPhases : bool ref
+      val printFctTypes : bool ref
+      val phases : string list ref
+      val tmdebugging : bool ref
+      val trdebugging : bool ref
+      val nmdebugging : bool ref
+      val redebugging : bool ref
+      val rtdebugging : bool ref
+      val inlineThreshold : int ref
+      val unrollThreshold : int ref
+      val maxargs : int ref
+      val dropinvariant : bool ref
+      val specialize : bool ref
+      val sharewrap : bool ref
+      val saytappinfo : bool ref
+      val check : bool ref
+      val checkDatatypes : bool ref
+      val checkKinds : bool ref
+      val plchk : bool ref
+      val recover : (int -> unit) ref
+      val misc : int ref
+    end
+  structure CG :
+    sig
+      val tailrecur : bool ref
+      val recordopt : bool ref
+      val tail : bool ref
+      val allocprof : bool ref
+      val closureprint : bool ref
+      val closureStrategy : int ref
+      val lambdaopt : bool ref
+      val cpsopt : string list ref
+      val rounds : int ref
+      val path : bool ref
+      val betacontract : bool ref
+      val eta : bool ref
+      val selectopt : bool ref
+      val dropargs : bool ref
+      val deadvars : bool ref
+      val flattenargs : bool ref
+      val extraflatten : bool ref
+      val switchopt : bool ref
+      val handlerfold : bool ref
+      val branchfold : bool ref
+      val arithopt : bool ref
+      val betaexpand : bool ref
+      val unroll : bool ref
+      val knownfiddle : bool ref
+      val invariant : bool ref
+      val targeting : int ref
+      val lambdaprop : bool ref
+      val newconreps : bool ref
+      val boxedconstconreps : bool ref
+      val sharepath : bool ref
+      val staticprof : bool ref
+      val unroll_recur : bool ref
+      val hoistup : bool ref
+      val hoistdown : bool ref
+      val recordcopy : bool ref
+      val recordpath : bool ref
+      val debugcps : bool ref
+      val misc4 : int ref
+      val argrep : bool ref
+      val bodysize : int ref
+      val reducemore : int ref
+      val alphac : bool ref
+      val comment : bool ref
+      val knownGen : int ref
+      val knownClGen : int ref
+      val escapeGen : int ref
+      val calleeGen : int ref
+      val spillGen : int ref
+      val foldconst : bool ref
+      val etasplit : bool ref
+      val printit : bool ref
+      val printsize : bool ref
+      val scheduling : bool ref
+      val cse : bool ref
+      val optafterclosure : bool ref
+      val uncurry : bool ref
+      val ifidiom : bool ref
+      val comparefold : bool ref
+      val csehoist : bool ref
+      val rangeopt : bool ref
+      val icount : bool ref
+      val debugRep : bool ref
+      val checklty1 : bool ref
+      val checklty2 : bool ref
+      val checklty3 : bool ref
+      val checkcps1 : bool ref
+      val checkcps2 : bool ref
+      val checkcps3 : bool ref
+      val checkcps : bool ref
+      val flatfblock : bool ref
+      val deadup : bool ref
+      val pollChecks : bool ref
+      val pollRatioAtoI : real ref
+      val printFlowgraphStream : TextIO.outstream ref
+      val memDisambiguate : bool ref
+      val controlDependence : bool ref
+      val compdebugging : bool ref
+    end
+  structure MLRISC :
+    sig
+      val registry : ?.ControlRegistry.registry
+      val prefix : string
+      val priority : ?.ControlReps.priority
+      type cpu_time = {gc:Time.time, sys:Time.time, usr:Time.time}
+      val mlrisc : bool ref
+      val mlrisc_phases : string list ref
+      val debug_stream : TextIO.outstream ref
+      type 'a set = ('a,'a ref) ?.ControlSet.control_set
+      val counters : int set
+      val ints : int set
+      val flags : bool set
+      val reals : real set
+      val strings : string set
+      val stringLists : string list set
+      val timings : cpu_time set
+      val mkCounter : string * string -> int ref
+      val mkInt : string * string -> int ref
+      val mkFlag : string * string -> bool ref
+      val mkReal : string * string -> real ref
+      val mkString : string * string -> string ref
+      val mkStringList : string * string -> string list ref
+      val mkTiming : string * string -> cpu_time ref
+      val counter : string -> int ref
+      val int : string -> int ref
+      val flag : string -> bool ref
+      val real : string -> real ref
+      val string : string -> string ref
+      val stringList : string -> string list ref
+      val timing : string -> cpu_time ref
+      val getCounter : string -> int ref
+      val getInt : string -> int ref
+      val getFlag : string -> bool ref
+      val getReal : string -> real ref
+      val getString : string -> string ref
+      val getStringList : string -> string list ref
+      val getTiming : string -> cpu_time ref
+    end
+  val debugging : bool ref
+  val printAst : bool ref
+  val printAbsyn : bool ref
+  val printWarnings : bool ref
+  val topregistry : ?.ControlRegistry.registry
+  val nest : string * ?.ControlRegistry.registry * ?.ControlReps.priority
+             -> unit
+  val primaryPrompt : string ref
+  val secondaryPrompt : string ref
+  val lazysml : bool ref
+  val overloadKW : bool ref
+  val quotation : bool ref
+  val interp : bool ref
+  val progressMsgs : bool ref
+  val saveLambda : bool ref
+  val preserveLvarNames : bool ref
+  val trackExn : bool ref
+  val polyEqWarn : bool ref
+  val indexing : bool ref
+  val instSigs : bool ref
+  val saveit : bool ref
+  val saveAbsyn : bool ref
+  val saveConvert : bool ref
+  val saveCPSopt : bool ref
+  val saveClosure : bool ref
+  structure LambdaSplitting :
+    sig
+      datatype globalsetting = Default of int option | Off
+      type localsetting = int option option
+      val UseDefault : localsetting
+      val Suggest : int option -> localsetting
+      val set : globalsetting -> unit
+      val get : unit -> int option
+      val get' : localsetting -> int option
+      val parse : string -> globalsetting option
+      val show : globalsetting -> string
+    end
+  val tdp_instrument : bool ref
+- 

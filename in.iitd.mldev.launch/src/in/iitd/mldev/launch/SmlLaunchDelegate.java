@@ -1,5 +1,7 @@
 package in.iitd.mldev.launch;
 
+import in.iitd.mldev.launch.background.SmlBackgroundProgram;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -44,16 +46,20 @@ public class SmlLaunchDelegate implements ILaunchConfigurationDelegate {
 		IProcess smlProcess = execSml(fileDir.toFile(), launch);
 		try {
 			boolean isCM = config.getAttribute(SmlLaunchPlugin.SML_CONFIG_IS_CM, false);
+			String toWrite;
 			if (isCM) {
 				IPreferenceStore store = SmlLaunchPlugin.getDefault().getPreferenceStore(); 
 				String makeFunction = store.getString(SmlLaunchPlugin.SML_CM_MAKE_FUNCTION);
-				if (makeFunction.equals(SmlLaunchPlugin.SML_CM_MAKE_UNIT))
-					smlProcess.getStreamsProxy().write("CM.make ();\n");
-				else
-					smlProcess.getStreamsProxy().write(makeFunction + " \"" + fileName + "\";\n");
+				
+				if (makeFunction.equals(SmlLaunchPlugin.SML_CM_MAKE_UNIT)){
+					toWrite = "CM.make ();\n";
+				}else{
+					toWrite = makeFunction + " \"" + fileName + "\";\n";}
 			} else {
-				smlProcess.getStreamsProxy().write("use \"" + fileName + "\";\n");
+				toWrite = "use \"" + fileName + "\";\n";
 			}
+			smlProcess.getStreamsProxy().write(toWrite);
+			new SmlBackgroundProgram(execSml(fileDir.toFile(), launch), toWrite, fileName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -62,11 +68,15 @@ public class SmlLaunchDelegate implements ILaunchConfigurationDelegate {
 	/** Runs the SML interpreter in a new process with the given
 	 * working directory, and add it to the given launch object. */
 	private IProcess execSml (File workingDir, ILaunch launch) throws CoreException {
+	
+		return DebugPlugin.newProcess(launch, execJavaSml(workingDir), "SML");
+	}
+	
+	private Process execJavaSml(File workingDir) throws CoreException{
 		String smlPath = SmlLaunchPlugin.getDefault().getPreferenceStore().getString(SmlLaunchPlugin.SML_EXECUTABLE_PATH);
 		if (smlPath == null || smlPath.length() == 0)
 			throw new CoreException(new Status(IStatus.ERROR, "in.iitd.mldev.launch", 1, "No SML interpreter specified in the launch preferences.", null));
-		Process process = DebugPlugin.exec(new String[] {smlPath}, workingDir);
-		return DebugPlugin.newProcess(launch, process, "SML");
+		return DebugPlugin.exec(new String[] {smlPath}, workingDir);
 	}
 	
 	/** Queries the given launch configuration for the file to be run,
