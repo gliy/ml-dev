@@ -6,8 +6,11 @@ import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
@@ -21,42 +24,9 @@ public class SmlUiPlugin extends AbstractUIPlugin {
 	//The shared instance.
 	private static SmlUiPlugin plugin;
 	
-	/** Boolean attribute for whether bracket matching is enabled.
-	 * We set it to true in initializeDefaultPluginPreferences,
-	 * and never change it, so bracket matching is always on. */
-	public static final String SML_BRACKET_MATCHING_ENABLED = "in.iitd.mldev.smlBracketMatchingEnabled";
-	/** Color attribute for the color of the bracket matching box. */
-	public static final String SML_BRACKET_MATCHING_COLOR = "in.iitd.mldev.smlBracketMatchingColor";
-
-	/** Color attribute for the color for keywords in syntax highlighting. */
-	public static final String SML_KEYWORD_COLOR = "in.iitd.mldev.smlKeywordColor";
-	/** Color attribute for the color for strings in syntax highlighting. */
-	public static final String SML_STRING_COLOR = "in.iitd.mldev.smlStringColor";
-	/** Color attribute for the color for comments in syntax highlighting. */
-	public static final String SML_COMMENT_COLOR = "in.iitd.mldev.smlCommentColor";
-	public static final String SML_INT_COLOR = "in.iitd.mldev.smlIntColor";
-	public static final String SML_REAL_COLOR = "in.iitd.mldev.smlRealColor";
-	/** Integer attribute for the tab width. */
-	public static final String SML_TAB_WIDTH = "in.iitd.mldev.smlTabWidth";
-	/** Boolean attribute for whether to mark syntax errors in the editor. */
-	public static final String SML_MARK_ERRORS = "in.iitd.mldev.smlMarkErrors";
-
-	public static final String SML_RAINBOW_PAREN = "in.iitd.mldev.rainbowParen";
-	public static final int SML_RAINBOW_PAREN_COUNT = 8;
-	public static final RGB[] SML_RAINBOW_PAREN_DEFAULTS = new RGB[]{
-		new RGB(212, 23, 142),
-		new RGB(130, 3, 3),
-		new RGB(40,161,50),
-		new RGB(227,174,14),
-		new RGB(100,127,209),
-		new RGB(100, 204, 209),
-		new RGB(237,230,14),
-		new RGB(219,77,207),
-	};
-
-	public static final String TEMPLATE_KEY = "in.iitd.mldev.templatestore";
 	//Resource bundle.
 	private ResourceBundle resourceBundle;
+	private IEclipsePreferences launchPrefs;
 	private ContributionContextTypeRegistry registry;
 	private ContributionTemplateStore store;
 
@@ -68,11 +38,16 @@ public class SmlUiPlugin extends AbstractUIPlugin {
 		plugin = this;
 		try {
 			resourceBundle = ResourceBundle.getBundle("in.iitd.mldev.ui.SmlUiPluginResources");
+			
 		} catch (MissingResourceException x) {
 			resourceBundle = null;
 		}
+			launchPrefs = InstanceScope.INSTANCE.getNode("in.iitd.mldev.launch");
 	}
 
+	public String getLaunchPath(){
+		return launchPrefs.get("in.iitd.mldev.smlExecutablePath", null);
+	}
 	/**
 	 * This method is called upon plug-in activation
 	 */
@@ -100,29 +75,30 @@ public class SmlUiPlugin extends AbstractUIPlugin {
 	@Override
 	protected void initializeDefaultPluginPreferences () {
 		IPreferenceStore store = getPreferenceStore();
-		store.setDefault(SML_BRACKET_MATCHING_ENABLED, true);
-		PreferenceConverter.setDefault(store, SML_BRACKET_MATCHING_COLOR, new RGB(192, 192, 192));
-		PreferenceConverter.setDefault(store, SML_KEYWORD_COLOR, new RGB(128,0,128));
-		PreferenceConverter.setDefault(store, SML_STRING_COLOR, new RGB(0,0,255));
-		PreferenceConverter.setDefault(store, SML_COMMENT_COLOR, new RGB(0,128,0));
-		PreferenceConverter.setDefault(store, SML_INT_COLOR, new RGB(128,128,0));
-		PreferenceConverter.setDefault(store, SML_REAL_COLOR, new RGB(128,128,50));
+		store.setDefault(PreferenceConstants.SML_BRACKET_MATCHING_ENABLED, true);
+		PreferenceConverter.setDefault(store, PreferenceConstants.SML_BRACKET_MATCHING_COLOR, new RGB(192, 192, 192));
+		PreferenceConverter.setDefault(store, PreferenceConstants.SML_KEYWORD_COLOR, new RGB(128,0,128));
+		PreferenceConverter.setDefault(store, PreferenceConstants.SML_STRING_COLOR, new RGB(0,0,255));
+		PreferenceConverter.setDefault(store, PreferenceConstants.SML_COMMENT_COLOR, new RGB(0,128,0));
+		PreferenceConverter.setDefault(store, PreferenceConstants.SML_INT_COLOR, new RGB(128,128,0));
+		PreferenceConverter.setDefault(store, PreferenceConstants.SML_REAL_COLOR, new RGB(128,128,50));
+		store.setDefault( PreferenceConstants.SML_REPL_HINTS,true);
 		setupRainbowParenDefaults(store);
-		store.setDefault(SML_TAB_WIDTH, 2);
-		store.setDefault(SML_MARK_ERRORS, true);
+		store.setDefault(PreferenceConstants.SML_TAB_WIDTH, 2);
+		store.setDefault(PreferenceConstants.SML_MARK_ERRORS, true);
 	}
 
 	private void setupRainbowParenDefaults(IPreferenceStore store) {
 		List<String> keys = getRainbowParenStrings();
 		for (int i = 0; i < keys.size(); i++) {
-			PreferenceConverter.setDefault(store, keys.get(i), SML_RAINBOW_PAREN_DEFAULTS[i]);
+			PreferenceConverter.setDefault(store, keys.get(i), PreferenceConstants.SML_RAINBOW_PAREN_DEFAULTS[i]);
 		}
 	}
 
 	public static final List<String> getRainbowParenStrings() {
 		List<String> rtn = new ArrayList<String>();
-		for (int i = 0; i < SML_RAINBOW_PAREN_COUNT; i++) {
-			rtn.add(SML_RAINBOW_PAREN + i);
+		for (int i = 0; i < PreferenceConstants.SML_RAINBOW_PAREN_COUNT; i++) {
+			rtn.add(PreferenceConstants.SML_RAINBOW_PAREN + i);
 		}
 		return rtn;
 	}
@@ -158,7 +134,7 @@ public class SmlUiPlugin extends AbstractUIPlugin {
 	public ContributionTemplateStore getTemplateStore() {
 		if(store == null) {
 			store = new ContributionTemplateStore(getRegistry(), getPreferenceStore(), 
-					SmlUiPlugin.TEMPLATE_KEY);
+					PreferenceConstants.TEMPLATE_KEY);
 			try {
 				store.load();
 			} catch (IOException e) {

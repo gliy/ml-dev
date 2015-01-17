@@ -10,11 +10,11 @@ import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 public class SmlReconcilingStrategy implements IReconcilingStrategy {
 
 	/** The editor whose document this instance maintains. */
-	private SmlEditor editor;
+	private ISmlEditor editor;
 
 	/** Creates a reconciling strategy to update the given editor's model
 	 * when the document changes. It should only be used with this editor. */
-	public SmlReconcilingStrategy (SmlEditor editor) {
+	public SmlReconcilingStrategy (ISmlEditor editor) {
 		this.editor = editor;
 	}
 	

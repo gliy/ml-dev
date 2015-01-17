@@ -3,6 +3,7 @@ package in.iitd.mldev.ui.editor;
 import in.iitd.mldev.core.SmlCorePlugin;
 import in.iitd.mldev.core.scan.SmlPartitionScanner;
 import in.iitd.mldev.core.scan.SmlTokenTypes;
+import in.iitd.mldev.ui.PreferenceConstants;
 import in.iitd.mldev.ui.SmlUiPlugin;
 import in.iitd.mldev.ui.text.SingleTokenScanner;
 import in.iitd.mldev.ui.text.SmlTextStyleScanner;
@@ -28,11 +29,11 @@ import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
 public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration {
 
 	/** The editor that this instance configures. */
-	private SmlEditor editor;
+	private ISmlEditor editor;
 
 	/** Creates a source viewer configuration to configure the given editor.
 	 * It should only be used with this editor. */
-	public SmlSourceViewerConfiguration (SmlEditor editor) {
+	public SmlSourceViewerConfiguration (ISmlEditor editor) {
 		this.editor = editor;
 	}
 	
@@ -101,7 +102,7 @@ public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration 
 	
 	/** Returns the width that a tab character should be displayed with. */
     public int getTabWidth (ISourceViewer viewer) {
-    	return SmlUiPlugin.getDefault().getPreferenceStore().getInt(SmlUiPlugin.SML_TAB_WIDTH);
+    	return SmlUiPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.SML_TAB_WIDTH);
     }
     
     /** Returns the reconciler that will updates the program model

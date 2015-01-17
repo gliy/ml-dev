@@ -3,8 +3,9 @@ package in.iitd.mldev.ui.editor;
 import in.iitd.mldev.core.model.ISmlProgramListener;
 import in.iitd.mldev.core.model.SmlBinding;
 import in.iitd.mldev.core.model.SmlProgram;
-import in.iitd.mldev.launch.background.SmlLineOutput;
-import in.iitd.mldev.launch.background.SmlLineOutput.SmlErrorOutput;
+import in.iitd.mldev.process.background.SmlLineOutput;
+import in.iitd.mldev.process.background.SmlLineOutput.SmlErrorOutput;
+import in.iitd.mldev.ui.PreferenceConstants;
 import in.iitd.mldev.ui.SmlUiPlugin;
 import in.iitd.mldev.ui.editor.outline.SmlContentOutlinePage;
 import in.iitd.mldev.ui.handler.SmlParseHandler;
@@ -38,7 +39,7 @@ import org.eclipse.ui.texteditor.SourceViewerDecorationSupport;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
 /** The SML editor. */
-public class SmlEditor extends TextEditor implements ISmlProgramListener {
+public class SmlEditor extends TextEditor implements ISmlProgramListener, ISmlEditor {
     public static SmlEditor editor;
     
 	/** The content outline page shown in the Outline view. */
@@ -92,8 +93,8 @@ public class SmlEditor extends TextEditor implements ISmlProgramListener {
 	protected void configureSourceViewerDecorationSupport (SourceViewerDecorationSupport support) {
 		super.configureSourceViewerDecorationSupport(support);
 		support.setCharacterPairMatcher(new SmlBracketMatcher());
-		support.setMatchingCharacterPainterPreferenceKeys(SmlUiPlugin.SML_BRACKET_MATCHING_ENABLED,
-				SmlUiPlugin.SML_BRACKET_MATCHING_COLOR);
+		support.setMatchingCharacterPainterPreferenceKeys(PreferenceConstants.SML_BRACKET_MATCHING_ENABLED,
+				PreferenceConstants.SML_BRACKET_MATCHING_COLOR);
 	}
 	
 	/** Returns the SmlProgram representing the document in this editor. */
@@ -112,7 +113,7 @@ public class SmlEditor extends TextEditor implements ISmlProgramListener {
 	 * after the user disables error marking. */
 	public void programChanged (SmlProgram program) {
 		removeErrorMarkers();
-		if (SmlUiPlugin.getDefault().getPreferenceStore().getBoolean(SmlUiPlugin.SML_MARK_ERRORS))
+		if (SmlUiPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.SML_MARK_ERRORS))
 			addErrorMarkers(program);
 	}
 	

@@ -50,15 +50,25 @@
            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
            sequence="CTRL+O">
      </key>
+     <key
+           commandId="in.iitd.mldev.ui.repl"
+           contextId="in.iitd.mldev.ui.editor.context"
+           schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+           sequence="CTRL+ALT+S">
+     </key>
   </extension>
   <extension
         point="org.eclipse.ui.handlers">
      <handler
-           class="in.iitd.mldev.ui.handler.SMLOpenDeclarationHandler"
+           class="in.iitd.mldev.ui.handler.SmlOpenDeclarationHandler"
            commandId="in.iitd.mldev.ui.openDeclaration">
      </handler>
      <handler
            commandId="in.iitd.mldev.ui.quickOutlineHandler">
+     </handler>
+     <handler
+           class="in.iitd.mldev.ui.handler.SmlReplHandler"
+           commandId="in.iitd.mldev.ui.repl">
      </handler>
   </extension>
   <extension
@@ -76,6 +86,11 @@
            categoryId="in.iitd.mldev.ui.keyBindings"
            id="in.iitd.mldev.ui.quickOutline"
            name="Quick Outline">
+     </command>
+     <command
+           categoryId="in.iitd.mldev.ui.keyBindings"
+           id="in.iitd.mldev.ui.repl"
+           name="Load In REPL">
      </command>
   </extension>
   <extension
@@ -129,10 +144,19 @@
      </column>
   </extension>
   <extension
-        point="in.iitd.mldev.launch.in.iitd.mldev.launch.parse">
-     <ParseAction
-           class="in.iitd.mldev.ui.handler.SmlParseHandler">
-     </ParseAction>
+        point="org.eclipse.ui.views">
+     <category
+           id="in.iitd.mldev.ui.smlView"
+           name="SML">
+     </category>
+     <view
+           allowMultiple="false"
+           category="in.iitd.mldev.ui.smlView"
+           class="in.iitd.mldev.ui.repl.SmlReplView"
+           id="in.iitd.mldev.ui.smlREPLView"
+           name="SML REPL"
+           restorable="true">
+     </view>
   </extension>
   
 </plugin>

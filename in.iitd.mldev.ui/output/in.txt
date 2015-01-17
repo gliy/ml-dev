@@ -1,0 +1,2 @@
+Control.Print.linewidth:=900000;
+use "interpreter.sml";

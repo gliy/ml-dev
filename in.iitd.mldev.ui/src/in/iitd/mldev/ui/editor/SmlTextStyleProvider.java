@@ -2,6 +2,7 @@ package in.iitd.mldev.ui.editor;
 
 import java.util.List;
 
+import in.iitd.mldev.ui.PreferenceConstants;
 import in.iitd.mldev.ui.SmlUiPlugin;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -29,13 +30,13 @@ public class SmlTextStyleProvider {
 	public SmlTextStyleProvider() {
 		IPreferenceStore store = SmlUiPlugin.getDefault().getPreferenceStore();
 		RGB keywordColor = PreferenceConverter.getColor(store,
-				SmlUiPlugin.SML_KEYWORD_COLOR);
+				PreferenceConstants.SML_KEYWORD_COLOR);
 		RGB stringColor = PreferenceConverter.getColor(store,
-				SmlUiPlugin.SML_STRING_COLOR);
+				PreferenceConstants.SML_STRING_COLOR);
 		RGB commentColor = PreferenceConverter.getColor(store,
-				SmlUiPlugin.SML_COMMENT_COLOR);
+				PreferenceConstants.SML_COMMENT_COLOR);
 		RGB integerColor = PreferenceConverter.getColor(store,
-				SmlUiPlugin.SML_INT_COLOR);
+				PreferenceConstants.SML_INT_COLOR);
 
 		keywordStyle = new TextAttribute(new Color(null, keywordColor), null,
 				SWT.BOLD);
@@ -46,7 +47,7 @@ public class SmlTextStyleProvider {
 		integerStyle = new TextAttribute(new Color(null, integerColor), null,
 				SWT.NORMAL);
 		realStyle = new TextAttribute(new Color(null, PreferenceConverter.getColor(store,
-				SmlUiPlugin.SML_REAL_COLOR)), null, SWT.NORMAL);
+				PreferenceConstants.SML_REAL_COLOR)), null, SWT.NORMAL);
 
 		List<String> keys = SmlUiPlugin.getRainbowParenStrings();
 		rainbowParensStyle = new TextAttribute[keys.size()];

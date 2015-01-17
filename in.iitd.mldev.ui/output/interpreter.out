@@ -1,0 +1,15 @@
+Standard ML of New Jersey v110.74 [built: Tue Jan 31 16:19:10 2012]
+- [opening test.sml]
+val f = fn : int -> int -> int
+val z = fn : int -> int
+val y = fn : int -> int
+val q = 1 : int
+val zx = fn : 'a -> real
+val x = [1] : int list
+val x = 9 : int
+val f = fn : 'a -> 'b -> int
+val zy = 1 : int
+val re = {a=1,b=2} : {a:int, b:int}
+val tup = (1,2) : int * int
+val it = () : unit
+- 

@@ -13,12 +13,12 @@ import in.iitd.mldev.core.parse.ast.LetExp;
 import in.iitd.mldev.core.parse.ast.Pat;
 import in.iitd.mldev.core.parse.ast.ValDec;
 import in.iitd.mldev.core.parse.ast.VarPat;
-import in.iitd.mldev.launch.background.SmlFunction;
-import in.iitd.mldev.launch.background.SmlModule;
-import in.iitd.mldev.launch.background.SmlObject;
-import in.iitd.mldev.launch.background.SmlObject.SmlType;
-import in.iitd.mldev.launch.background.SmlProgramOutput;
-import in.iitd.mldev.launch.background.SmlVal;
+import in.iitd.mldev.process.background.SmlFunction;
+import in.iitd.mldev.process.background.SmlModule;
+import in.iitd.mldev.process.background.SmlObject;
+import in.iitd.mldev.process.background.SmlProgramOutput;
+import in.iitd.mldev.process.background.SmlVal;
+import in.iitd.mldev.process.background.SmlObject.SmlType;
 import in.iitd.mldev.ui.SmlUiPlugin;
 import in.iitd.mldev.ui.handler.SmlParseHandler;
 
@@ -41,9 +41,9 @@ import org.eclipse.swt.graphics.Image;
 
 public class SmlContentAssistProcessor extends TemplateCompletionProcessor {
 
-	private SmlEditor editor;
+	private ISmlEditor editor;
 
-	public SmlContentAssistProcessor(SmlEditor editor) {
+	public SmlContentAssistProcessor(ISmlEditor editor) {
 		super();
 		this.editor = editor;
 
@@ -314,6 +314,8 @@ public class SmlContentAssistProcessor extends TemplateCompletionProcessor {
 				if (obj.getType() != SmlType.EXCEPTION_TYPE) {
 					if (isFunction && obj.getType() == SmlType.FN_TYPE) {
 						rtn.add(obj);
+					} else if (!isFunction && obj.getType() != SmlType.FN_TYPE) {
+						rtn.add(obj);
 					}
 				}
 			}
@@ -327,7 +329,7 @@ public class SmlContentAssistProcessor extends TemplateCompletionProcessor {
 			} else if (obj.getClass() == SmlVal.class) {
 				SmlVal val = (SmlVal) obj;
 				return createProposal(val.getName(), val.getValue() + " : "
-						+ val.getValType());
+						+ val.getType());
 			}
 			return null;
 		}

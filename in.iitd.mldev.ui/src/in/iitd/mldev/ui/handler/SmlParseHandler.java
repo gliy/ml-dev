@@ -1,8 +1,8 @@
 package in.iitd.mldev.ui.handler;
 
-import in.iitd.mldev.launch.background.ISmlParsed;
-import in.iitd.mldev.launch.background.SmlModule;
-import in.iitd.mldev.launch.background.SmlProgramOutput;
+import in.iitd.mldev.process.background.ISmlParsed;
+import in.iitd.mldev.process.background.SmlModule;
+import in.iitd.mldev.process.background.SmlProgramOutput;
 import in.iitd.mldev.ui.editor.SmlEditor;
 
 public class SmlParseHandler implements ISmlParsed {

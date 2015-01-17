@@ -1,18 +1,9 @@
 package in.iitd.mldev.launch;
 
-import in.iitd.mldev.launch.background.ISmlParsed;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -51,7 +42,6 @@ public class SmlLaunchPlugin extends AbstractUIPlugin {
 	/** Indicates that the CM make function is "CM.make' &lt;file&gt;". */
 	public static final String SML_CM_MAKEP_STRING = "CM.make'";
 	private static final String SML_PARSE_EXTENSION_ID = "in.iitd.mldev.launch.in.iitd.mldev.launch.parse";
-	private List<ISmlParsed> parseListeners;
 
 	/**
 	 * The constructor.
@@ -114,37 +104,4 @@ public class SmlLaunchPlugin extends AbstractUIPlugin {
 		return resourceBundle;
 	}
 
-	public List<ISmlParsed> getParseListeners() {
-		if (parseListeners == null) {
-			parseListeners = new ArrayList<ISmlParsed>();
-			try {
-				IExtensionRegistry registry = Platform.getExtensionRegistry();
-				IExtensionPoint extensionPoint = registry
-						.getExtensionPoint(SML_PARSE_EXTENSION_ID);
-				IExtension[] extensions = extensionPoint.getExtensions();
-				if(extensions == null) {
-					extensions = new IExtension[0];
-				}
-				// For each extension ...
-				for (int i = 0; i < extensions.length; i++) {
-					IExtension extension = extensions[i];
-					IConfigurationElement[] elements = extension
-							.getConfigurationElements();
-					// For each member of the extension ...
-					for (int j = 0; j < elements.length; j++) {
-						IConfigurationElement element = elements[j];
-						parseListeners.add((ISmlParsed) element
-								.createExecutableExtension("class"));
-					}
-				}
-			} catch (CoreException ex) {
-				ex.printStackTrace();
-			}
-					
-				
-			
-		}
-
-		return parseListeners;
-	}
 }

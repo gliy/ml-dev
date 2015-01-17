@@ -1,7 +1,5 @@
 package in.iitd.mldev.launch;
 
-import in.iitd.mldev.launch.background.SmlBackgroundProgram;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -59,7 +57,6 @@ public class SmlLaunchDelegate implements ILaunchConfigurationDelegate {
 				toWrite = "use \"" + fileName + "\";\n";
 			}
 			smlProcess.getStreamsProxy().write(toWrite);
-			new SmlBackgroundProgram(execSml(fileDir.toFile(), launch), toWrite, fileName);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

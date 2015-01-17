@@ -1,5 +1,6 @@
 package in.iitd.mldev.ui.preferences;
 
+import in.iitd.mldev.ui.PreferenceConstants;
 import in.iitd.mldev.ui.SmlUiPlugin;
 
 import org.eclipse.jface.preference.BooleanFieldEditor;
@@ -24,13 +25,13 @@ public class SmlMainPreferencePage extends FieldEditorPreferencePage implements 
 	 * editors for all the required fields, and everything else will take
 	 * care of itself. */
 	protected void createFieldEditors () {
-		addField(new ColorFieldEditor(SmlUiPlugin.SML_KEYWORD_COLOR, "Keyword colour:", getFieldEditorParent()));
-		addField(new ColorFieldEditor(SmlUiPlugin.SML_STRING_COLOR, "String colour:", getFieldEditorParent()));
-		addField(new ColorFieldEditor(SmlUiPlugin.SML_COMMENT_COLOR, "Comment colour:", getFieldEditorParent()));
-		addField(new ColorFieldEditor(SmlUiPlugin.SML_INT_COLOR, "Integer colour:", getFieldEditorParent()));
-		addField(new ColorFieldEditor(SmlUiPlugin.SML_REAL_COLOR, "Real colour:", getFieldEditorParent()));
-		addField(new IntegerFieldEditor(SmlUiPlugin.SML_TAB_WIDTH, "Tab width:", getFieldEditorParent()));
-		addField(new BooleanFieldEditor(SmlUiPlugin.SML_MARK_ERRORS, "Mark syntax errors in editor", getFieldEditorParent()));
+		addField(new ColorFieldEditor(PreferenceConstants.SML_KEYWORD_COLOR, "Keyword colour:", getFieldEditorParent()));
+		addField(new ColorFieldEditor(PreferenceConstants.SML_STRING_COLOR, "String colour:", getFieldEditorParent()));
+		addField(new ColorFieldEditor(PreferenceConstants.SML_COMMENT_COLOR, "Comment colour:", getFieldEditorParent()));
+		addField(new ColorFieldEditor(PreferenceConstants.SML_INT_COLOR, "Integer colour:", getFieldEditorParent()));
+		addField(new ColorFieldEditor(PreferenceConstants.SML_REAL_COLOR, "Real colour:", getFieldEditorParent()));
+		addField(new IntegerFieldEditor(PreferenceConstants.SML_TAB_WIDTH, "Tab width:", getFieldEditorParent()));
+		addField(new BooleanFieldEditor(PreferenceConstants.SML_MARK_ERRORS, "Mark syntax errors in editor", getFieldEditorParent()));
 	}
 
 	/** Nothing to initialize. */
