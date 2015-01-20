@@ -30,7 +30,7 @@ public class SmlBackgroundProgram {
 							IStreamMonitor monitor) {
 						for (String line : text.split("\n")) {
 							String trimmed = line.trim();
-							parser.parse(trimmed);
+							parser.lineRead(null,trimmed);
 							if(trimmed.startsWith("-")) {
 								count++;
 							}
@@ -67,7 +67,7 @@ public class SmlBackgroundProgram {
 	private String getSettings() {
 		return String.format("%s;%s;", "Control.Print.linewidth:=900", "Control.Print.signatures := 0");
 	}
-	private void fireParseEvent(SmlModule root) {
+	private void fireParseEvent(ISmlModule root) {
 		SmlProgramOutput output = new SmlProgramOutput(
 				root);
 //		for (ISmlParsed parseListener : SmlLaunchPlugin

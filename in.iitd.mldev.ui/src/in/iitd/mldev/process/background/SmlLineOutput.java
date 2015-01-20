@@ -1,6 +1,6 @@
 package in.iitd.mldev.process.background;
 
-public abstract class SmlLineOutput {
+public abstract class SmlLineOutput{
 
 	private int startLine;
 	private int startCol;

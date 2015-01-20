@@ -7,6 +7,7 @@ public class SmlVal extends SmlObject {
 	
 	public SmlVal(String name, String value, String type) {
 		super(name, type);
+		this.value = value;
 	}
 
 	public String getValue() {
@@ -15,6 +16,6 @@ public class SmlVal extends SmlObject {
 	
 	@Override
 	public String toString() {
-		return String.format("%s : %s : %s", name, getValue(), getType());
+		return String.format("%s : %s", getValue(), getType());
 	}
 }

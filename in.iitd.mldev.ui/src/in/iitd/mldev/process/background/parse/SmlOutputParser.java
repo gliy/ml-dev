@@ -1,48 +1,52 @@
 package in.iitd.mldev.process.background.parse;
 
-import in.iitd.mldev.process.background.SmlModule;
+import in.iitd.mldev.process.ISmlListener;
+import in.iitd.mldev.process.background.ISmlModule;
 
 import java.util.List;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-public class SmlOutputParser {
-	private Stack<SmlModule> currentModules;
+public class SmlOutputParser implements ISmlListener {
+	private Stack<ISmlModule> currentModules;
 	//private static final ILog LOGGER = SmlLaunchPlugin.getDefault().getLog();
 	private List<SmlParseAction> parseActions;
-	private SmlModule root;
+	private ISmlModule root;
 
-	public SmlOutputParser(SmlModule root) {
+	
+	public SmlOutputParser(ISmlModule root) {
 		this.root = root;
-		this.currentModules = new Stack<SmlModule>();
+		this.currentModules = new Stack<ISmlModule>();
 		this.currentModules.push(root);
 		this.parseActions = ParseActions.getActions();
 	}
 
-	public SmlModule getCurrent() {
+	public ISmlModule getCurrent() {
 		if(currentModules.isEmpty()) {
 			return root;
 		}
 		return currentModules.peek();
 	}
 
-	public void setCurrent(SmlModule module) {
+	public void setCurrent(ISmlModule module) {
 		this.currentModules.push(module);
 	}
 
 	public void unsetCurrent() {
 		if(!this.currentModules.isEmpty()) {
-			SmlModule old = this.currentModules.pop();
+			ISmlModule old = this.currentModules.pop();
 			System.out.println("Popping " + old.getName());
 		}
 		System.out.println("Stack is empty!");
 	}
 
-	public void parse(String data) {
+	@Override
+	public void lineRead(IFile file, String data) {
 		Matcher matcher = null;
 		for (SmlParseAction action : parseActions) {
 			if(parse(action, matcher, data)) {

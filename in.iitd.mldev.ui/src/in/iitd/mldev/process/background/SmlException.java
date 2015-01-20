@@ -1,15 +1,19 @@
 package in.iitd.mldev.process.background;
 
-public class SmlException extends SmlFunction {
+import java.util.List;
 
+public class SmlException extends SmlObject {
+
+	private List<SmlType> types;
 	public SmlException(String name, String... types) {
-		super(name, types);
+		super(name, SmlType.EXCEPTION_TYPE);
+		this.types = SmlType.parseTypes(types);
 	}
 	
-	@Override
-	public SmlType getType() {
-		return SmlType.EXCEPTION_TYPE;
+	public List<SmlType> getTypes() {
+		return types;
 	}
+	
 
 	
 }

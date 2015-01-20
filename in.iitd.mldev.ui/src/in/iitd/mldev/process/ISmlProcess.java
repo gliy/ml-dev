@@ -1,10 +1,12 @@
 package in.iitd.mldev.process;
 
+import org.eclipse.core.resources.IFile;
+
 public interface ISmlProcess {
 
 
+	void load(IFile file);
 	void terminate();
-	String getFileName();
 	void send(String data);
 	
 	
@@ -21,11 +23,11 @@ public interface ISmlProcess {
 			// TODO Auto-generated method stub
 			
 		}
-		
+
 		@Override
-		public String getFileName() {
-			// TODO Auto-generated method stub
-			return null;
+		public void load(IFile file) {
 		}
+		
+		
 	};
 }

@@ -1,7 +1,9 @@
 package in.iitd.mldev.process;
 
+import org.eclipse.core.resources.IFile;
+
 public interface ISmlListener {
 
-	void lineRead(String file, String line);
+	void lineRead(IFile file, String line);
 	
 }

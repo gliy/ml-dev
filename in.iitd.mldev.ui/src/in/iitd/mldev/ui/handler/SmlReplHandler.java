@@ -7,6 +7,7 @@ import in.iitd.mldev.ui.repl.SmlReplView;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -18,17 +19,23 @@ public class SmlReplHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-		System.out.println(page);
+		IFile file = getActiveFile(page);
+		if(file != null){
+				try {
+					SmlReplView.connect(file, true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+		}
+		return null;
+	}
+	
+	public static IFile getActiveFile(IWorkbenchPage page) {
 		if(page.getActiveEditor().getClass() == SmlEditor.class) {
 			IEditorInput editor = page.getActiveEditor().getEditorInput();
 			if(editor instanceof FileEditorInput){
 				FileEditorInput fileInput = (FileEditorInput)editor;
-				//SmlLauncher.launch(fileInput.getFile());
-				try {
-					SmlReplView.connect(fileInput.getFile(), true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				return fileInput.getFile();
 			}
 		}
 		return null;

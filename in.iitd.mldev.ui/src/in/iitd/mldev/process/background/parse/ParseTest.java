@@ -1,5 +1,6 @@
 package in.iitd.mldev.process.background.parse;
 
+import in.iitd.mldev.process.background.ISmlModule;
 import in.iitd.mldev.process.background.SmlFunction;
 import in.iitd.mldev.process.background.SmlLineOutput;
 import in.iitd.mldev.process.background.SmlModule;
@@ -21,7 +22,7 @@ public class ParseTest {
 		int i = 1;
 		while (scanner.hasNextLine()) {
 			// System.out.print((i++) +": ");
-			parser.parse(scanner.nextLine());
+			//parser.lineRead(scanner.nextLine());
 			//System.out.println(i++);
 		}
 		scanner.close();
@@ -29,7 +30,7 @@ public class ParseTest {
 		output(root);
 	}
 
-	private static void output(SmlModule root) {
+	private static void output(ISmlModule root) {
 		System.out.println("\n" + root.getName());
 		System.out.println("===============Functions===========\n");
 		for (SmlObject fn : root.getDeclaredObjects()) {
@@ -39,7 +40,7 @@ public class ParseTest {
 		for (SmlLineOutput line : root.getErrors()) {
 			System.out.println(line);
 		}
-		for (SmlModule fn : root.getModules()) {
+		for (ISmlModule fn : root.getModules()) {
 			
 			output(fn);
 		}

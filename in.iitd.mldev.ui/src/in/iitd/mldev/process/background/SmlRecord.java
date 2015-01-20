@@ -31,7 +31,7 @@ public class SmlRecord extends SmlObject {
 
 	@Override
 	public String toString() {
-		return String.format("%s : {%s} : {%s}", name,
+		return String.format("{%s} : {%s}",
 				StringUtils.join(values.entrySet(), ","),
 				StringUtils.join(types.entrySet(), ", "));
 	}

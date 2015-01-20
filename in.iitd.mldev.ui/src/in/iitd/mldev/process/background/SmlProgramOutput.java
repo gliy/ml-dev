@@ -7,13 +7,13 @@ import java.util.Map;
 import org.eclipse.swt.internal.C;
 
 public class SmlProgramOutput {
-	private SmlModule root;
+	private ISmlModule root;
 
-	public SmlProgramOutput(SmlModule root) {
+	public SmlProgramOutput(ISmlModule root) {
 		super();
 		this.root = root;
 	}
-	public SmlModule getRoot() {
+	public ISmlModule getRoot() {
 		return root;
 	}
 	

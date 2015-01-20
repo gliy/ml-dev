@@ -95,7 +95,7 @@ public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration 
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 		ContentAssistant assistant = new ContentAssistant();
 		assistant.setContentAssistProcessor(new SmlContentAssistProcessor(editor), IDocument.DEFAULT_CONTENT_TYPE);
-		//assistant.enableAutoActivation(true);
+		assistant.enableAutoActivation(true);
 		return assistant;
 	}
 	

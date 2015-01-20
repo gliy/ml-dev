@@ -10,12 +10,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.internal.utils.FileUtil;
 import org.eclipse.core.resources.IFile;
 
 public class SmlLauncher {
-	private static List<ISmlListener> listeners;
+	//private static List<ISmlListener> listeners;
 	private SmlLauncher() {
-		this.listeners = new ArrayList<ISmlListener>();
+	//	this.listeners = new ArrayList<ISmlListener>();
 
 	}
 	public static void registerListener(ISmlListener listener) {
@@ -23,18 +24,23 @@ public class SmlLauncher {
 	}
 
 	public static ISmlProcess launch(IFile file) {
-		return launch(file, SmlLauncher.listeners.toArray(new ISmlListener[0]));
+		return launch(file);
 	}
 	
 	public static ISmlProcess launch(IFile file, ISmlListener ...listeners) {
 		String smlPath = SmlUiPlugin.getDefault().getLaunchPath();
+		if(smlPath == null) {
+			return ISmlProcess.ERROR;
+		}
 		if(listeners == null) {
 			listeners = new ISmlListener[0];
 		}
 		try {
-			return new SmlProcess(new ProcessBuilder(smlPath).directory(file
-					.getParent().getLocation().toFile()), file.getName(),
+			SmlProcess process = new SmlProcess(new ProcessBuilder(smlPath).directory(file
+					.getParent().getLocation().toFile()),
 					Arrays.asList(listeners));
+			process.load(file);
+			return process;
 		} catch (Exception e) {
 			return ISmlProcess.ERROR;
 		}
@@ -43,18 +49,17 @@ public class SmlLauncher {
 	private static class SmlProcess implements ISmlProcess {
 		private Process process;
 		private List<ISmlListener> listeners;
-		private String fileName;
 		private PrintWriter writer;
+		private IFile activeFile;
 		private Thread reader;
-		public SmlProcess(ProcessBuilder processBuilder, String fileName,
+		public SmlProcess(ProcessBuilder processBuilder, 
 				List<ISmlListener> listeners) throws IOException {
 			this.process = processBuilder.start();
 			this.listeners = listeners;
-			this.fileName = fileName;
 			this.writer = new PrintWriter(this.process.getOutputStream());
 			this.reader = new Thread(new SmlReader());
 			this.reader.start();
-			send(String.format("use \"%s\";", fileName));
+			
 		}
 
 		@Override
@@ -63,8 +68,9 @@ public class SmlLauncher {
 		}
 
 		@Override
-		public String getFileName() {
-			return fileName;
+		public void load(IFile file) {
+			this.activeFile = file;
+			send(String.format("use \"%s\";", file.getLocation().toFile().getPath().replaceAll("\\\\", "\\\\\\\\")));
 		}
 
 		@Override
@@ -84,7 +90,7 @@ public class SmlLauncher {
 					String t;
 					while((t=reader.readLine()) != null) {
 						for (ISmlListener listener : listeners) {
-							listener.lineRead(fileName, t);
+							listener.lineRead(activeFile, t);
 						}
 					}
 				}catch(Exception e) {

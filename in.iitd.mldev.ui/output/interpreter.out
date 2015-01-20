@@ -11,5 +11,6 @@ val f = fn : 'a -> 'b -> int
 val zy = 1 : int
 val re = {a=1,b=2} : {a:int, b:int}
 val tup = (1,2) : int * int
+val li = [1,2] : int list
 val it = () : unit
 - 

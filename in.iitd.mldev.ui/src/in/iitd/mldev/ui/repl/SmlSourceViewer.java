@@ -1,6 +1,7 @@
 package in.iitd.mldev.ui.repl;
 
 import in.iitd.mldev.core.model.SmlProgram;
+import in.iitd.mldev.process.background.SmlModule;
 import in.iitd.mldev.ui.editor.ISmlEditor;
 import in.iitd.mldev.ui.editor.SmlEditor;
 
@@ -29,4 +30,9 @@ public class SmlSourceViewer extends ProjectionViewer implements
 		return SmlEditor.editor.getProgram();
 	}
 
+	@Override
+	public SmlModule getRoot() {
+		return SmlEditor.editor.getRoot();
+	}
+	
 }

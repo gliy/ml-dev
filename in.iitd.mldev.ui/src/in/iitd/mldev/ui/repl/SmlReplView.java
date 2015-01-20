@@ -10,8 +10,6 @@ import in.iitd.mldev.ui.editor.SmlSourceViewerConfiguration;
 import in.iitd.mldev.utils.DisplayUtil;
 import in.iitd.mldev.utils.StringUtils;
 
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
@@ -23,7 +21,6 @@ import org.eclipse.debug.ui.console.IConsole;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
@@ -35,6 +32,8 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
@@ -63,58 +62,53 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 	private IConsole console;
 	private ILaunch launch;
 	private String sessionId;
-	private String secondaryId;
 	public StyledText viewerWidget;
 	private SourceViewerDecorationSupport fSourceViewerDecorationSupport;
 	private static final Pattern boostIndent = Pattern.compile("^",
 			Pattern.MULTILINE);
 	public static final String VIEW_ID = "in.iitd.mldev.ui.smlREPLView";
 	public static final AtomicReference<SmlReplView> activeREPL = new AtomicReference<SmlReplView>();
-	private static Set<String> SECONDARY_VIEW_IDS = new TreeSet<String>() {
-		{
-			// no one will create more than 1000 REPLs at a time, right? :-P
-			for (int i = 0; i < 1000; i++)
-				add(String.format("%03d", i));
-		}
-	};
+
 	private ISmlProcess program;
-
-	private static String getSecondaryId() {
-		synchronized (SECONDARY_VIEW_IDS) {
-			String id = SECONDARY_VIEW_IDS.iterator().next();
-			SECONDARY_VIEW_IDS.remove(id);
-			return id;
-		}
-	}
-
-	private static void releaseSecondaryId(String id) {
-		assert id != null;
-
-		synchronized (SECONDARY_VIEW_IDS) {
-			SECONDARY_VIEW_IDS.add(id);
-		}
-	}
 
 	public IConsole getConsole() {
 		return console;
 	}
 
-	public static SmlReplView connect(IFile file,
-			boolean makeActiveREPL) throws Exception {
+	@Override
+	public void dispose() {
+		super.dispose();
+
+		System.out.println("DISPOSED");
+		if (this.program != null) {
+			this.program.terminate();
+
+		}
+		SmlReplView.activeREPL.set(null);
+
+	}
+
+	public static SmlReplView connect(IFile file, boolean makeActiveREPL)
+			throws Exception {
 		return connect(file, null, null, makeActiveREPL);
 	}
 
-	public static SmlReplView connect(final IFile file,
-			IConsole console, ILaunch launch, final boolean makeActiveREPL)
-			throws Exception {
-		String secondaryId;
-		final SmlReplView repl = (SmlReplView) PlatformUI
-				.getWorkbench()
-				.getActiveWorkbenchWindow()
-				.getActivePage()
-				.showView(VIEW_ID, secondaryId = getSecondaryId(),
-						IWorkbenchPage.VIEW_ACTIVATE);
-		repl.secondaryId = secondaryId;
+	public static SmlReplView connect(final IFile file, IConsole console,
+			ILaunch launch, final boolean makeActiveREPL) throws Exception {
+		SmlReplView replView = SmlReplView.activeREPL.get();
+		if (replView != null) {
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+					.getActivePage()
+					.showView(VIEW_ID, null, IWorkbenchPage.VIEW_ACTIVATE);
+			if (replView.program != null) {
+				replView.program.load(file);
+			} else {
+				replView.configure(file);
+			}
+		}
+		final SmlReplView repl = (SmlReplView) PlatformUI.getWorkbench()
+				.getActiveWorkbenchWindow().getActivePage()
+				.showView(VIEW_ID, null, IWorkbenchPage.VIEW_ACTIVATE);
 		repl.console = console;
 		// repl.showConsoleAction.setEnabled(console != null);
 		repl.launch = launch;
@@ -128,20 +122,20 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 
 	private void configure(IFile file) {
 		this.program = SmlLauncher.launch(file, new ISmlListener() {
-			
+
 			@Override
-			public void lineRead(String file, final String line) {
+			public void lineRead(IFile file, final String line) {
 				DisplayUtil.asyncExec(new Runnable() {
-					
+
 					@Override
 					public void run() {
 						logPanel.append(line + "\n");
 					}
 				});
-				
+
 			}
-		});;
-		
+		});
+
 	}
 
 	@Override
@@ -150,6 +144,7 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 		activeREPL.set(SmlReplView.this);
 	}
 
+	@SuppressWarnings("restriction")
 	@Override
 	public void createPartControl(Composite parent) {
 		final IPreferenceStore prefs = SmlUiPlugin.getDefault()
@@ -166,48 +161,65 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 				| SWT.H_SCROLL);
 
 		viewerConfig = new SmlSourceViewerConfiguration(viewer);
+		fSourceViewerDecorationSupport = new SourceViewerDecorationSupport(
+				viewer, null, null, EditorsPlugin.getDefault()
+						.getSharedTextColors());
+		fSourceViewerDecorationSupport.install(prefs);
 		viewer.configure(viewerConfig);
-
 		viewerWidget = viewer.getTextWidget();
 
 		getViewSite().setSelectionProvider(viewer);
 		viewer.setDocument(new Document());
 		final StyledText st = (StyledText) viewer.getControl();
 		setPlaceHolder(st, "<type SML code here>");
-		
-		
+
 		installMessageDisplayer(viewerWidget, new MessageProvider() {
 			@Override
 			public String getMessageText() {
 				return getEvaluationHint();
 			}
 		});
-		
-		installAutoEvalExpressionOnEnter();
-		
-	}
-	
-	private interface MessageProvider {
-    	String getMessageText();
-    }
-	
-    private void installMessageDisplayer(final StyledText textViewer, final MessageProvider hintProvider) {
-		textViewer.addListener(SWT.Paint, new Listener() {
-		    private int getScrollbarAdjustment () {
-		        if (!Platform.getOS().equals(Platform.OS_MACOSX)) return 0;
 
-		        // You cannot reliably determine if a scrollbar is visible or not
-                //   (http://stackoverflow.com/questions/5674207)
-                // So, we need to determine if the vertical scrollbar is "needed" based
-                // on the contents in the viewer
-                Rectangle clientArea = textViewer.getClientArea();
-                int textLength = textViewer.getText().length();
-                if (textLength == 0 || textViewer.getTextBounds(0, Math.max(0, textLength - 1)).height < clientArea.height) {
-                    return textViewer.getVerticalBar().getSize().x;
-                } else {
-                    return 0;
-                }
-		    }
+		logPanel.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				logPanel.setTopIndex(logPanel.getLineCount() - 1);
+
+			}
+		});
+
+		installAutoEvalExpressionOnEnter();
+
+	}
+
+	private interface MessageProvider {
+		String getMessageText();
+	}
+
+	private void installMessageDisplayer(final StyledText textViewer,
+			final MessageProvider hintProvider) {
+		textViewer.addListener(SWT.Paint, new Listener() {
+			private int getScrollbarAdjustment() {
+				if (!Platform.getOS().equals(Platform.OS_MACOSX))
+					return 0;
+
+				// You cannot reliably determine if a scrollbar is visible or
+				// not
+				// (http://stackoverflow.com/questions/5674207)
+				// So, we need to determine if the vertical scrollbar is
+				// "needed" based
+				// on the contents in the viewer
+				Rectangle clientArea = textViewer.getClientArea();
+				int textLength = textViewer.getText().length();
+				if (textLength == 0
+						|| textViewer.getTextBounds(0,
+								Math.max(0, textLength - 1)).height < clientArea.height) {
+					return textViewer.getVerticalBar().getSize().x;
+				} else {
+					return 0;
+				}
+			}
 
 			@Override
 			public void handleEvent(Event event) {
@@ -215,16 +227,20 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 				if (message == null)
 					return;
 
-                // keep the 'tooltip' using the default font
-                event.gc.setFont(JFaceResources.getFont(JFaceResources.DEFAULT_FONT));
+				// keep the 'tooltip' using the default font
+				event.gc.setFont(JFaceResources
+						.getFont(JFaceResources.DEFAULT_FONT));
 
 				Point topRightPoint = topRightPoint(textViewer.getClientArea());
 				int sWidth = textWidthPixels(message, event);
-				int x = Math.max(topRightPoint.x - sWidth + getScrollbarAdjustment(), 0);
+				int x = Math.max(topRightPoint.x - sWidth
+						+ getScrollbarAdjustment(), 0);
 				int y = topRightPoint.y;
 
-				// the text widget doesn't know we're painting the hint, so it won't necessarily
-				// clear old presentations of it; this leads to streaking on Windows if we don't
+				// the text widget doesn't know we're painting the hint, so it
+				// won't necessarily
+				// clear old presentations of it; this leads to streaking on
+				// Windows if we don't
 				// clear the foreground explicitly
 				Color fg = event.gc.getForeground();
 				event.gc.setForeground(event.gc.getBackground());
@@ -246,22 +262,25 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 				return width;
 			}
 		});
-    }
+	}
 
-    private String getEvaluationHint() {
-    	if (!getPreferences().getBoolean(PreferenceConstants.SML_REPL_HINTS))
-    		return null;
-    	return "??";
+	private String getEvaluationHint() {
+		if (!getPreferences().getBoolean(PreferenceConstants.SML_REPL_HINTS))
+			return null;
+		return "";
 
-//    	if (getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE)) {
-//    		return Messages.REPLView_autoEval_on_Enter_active;
-//    	} else {
-//    		return Messages.format(Messages.REPLView_autoEval_on_Enter_inactive,
-//    				Platform.getOS().equals(Platform.OS_MACOSX)
-//    					? "Cmd"
-//    				    : "Ctrl");
-//    	}
-    }
+		// if
+		// (getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE))
+		// {
+		// return Messages.REPLView_autoEval_on_Enter_active;
+		// } else {
+		// return Messages.format(Messages.REPLView_autoEval_on_Enter_inactive,
+		// Platform.getOS().equals(Platform.OS_MACOSX)
+		// ? "Cmd"
+		// : "Ctrl");
+		// }
+	}
+
 	private void setPlaceHolder(final StyledText st, final String placeholder) {
 		final IPropertyChangeListener replHintsListener = new IPropertyChangeListener() {
 			@Override
@@ -352,11 +371,11 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 		try {
 			if (s.trim().length() > 0) {
 				program.send(s);
-				
+
 				// if (printToLog) viewHelpers._("log", this, logPanel, s,
 				// inputExprLogType);
 
-			//	final Object ret = evalExpression.invoke(s, addToHistory);
+				// final Object ret = evalExpression.invoke(s, addToHistory);
 
 				// if (repeatLastREPLEvalIfActive &&
 				// autoRepeatLastAction.isChecked()) {
@@ -433,7 +452,8 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 							int idx = text.indexOf(widgetText);
 							if (idx == 0
 									&& text.substring(widgetText.length())
-											.trim().isEmpty()) {
+											.trim().isEmpty()
+											&& isValidExpression(text)) {
 								evalExpression();
 							}
 						}
@@ -443,20 +463,35 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 		});
 	}
 
-//	protected SourceViewerDecorationSupport getSourceViewerDecorationSupport(ISourceViewer viewer) {
-//		if (fSourceViewerDecorationSupport == null) {
-//			fSourceViewerDecorationSupport= new SourceViewerDecorationSupport(
-//					viewer,
-//					null/*getOverviewRuler()*/,
-//					null/*getAnnotationAccess()*/,
-//					EditorsPlugin.getDefault().getSharedTextColors()/*getSharedColors()*/
-//					);
-//			editorSupport._("configureSourceViewerDecorationSupport",
-//					fSourceViewerDecorationSupport, viewer);
-//			fSourceViewerDecorationSupport.
-//		}
-//		return fSourceViewerDecorationSupport;
-//	}
+	private static boolean isValidExpression(String text) {
+		if(!text.trim().endsWith(";")) {
+			return false;
+		}
+		int count = 0;
+		for(char c : text.toCharArray()) {
+			if(c == '(') {
+				count ++;
+			} else if (c== ')') {
+				count--;
+			}
+		}
+		return count == 0;
+	}
+	// protected SourceViewerDecorationSupport
+	// getSourceViewerDecorationSupport(ISourceViewer viewer) {
+	// if (fSourceViewerDecorationSupport == null) {
+	// fSourceViewerDecorationSupport= new SourceViewerDecorationSupport(
+	// viewer,
+	// null/*getOverviewRuler()*/,
+	// null/*getAnnotationAccess()*/,
+	// EditorsPlugin.getDefault().getSharedTextColors()/*getSharedColors()*/
+	// );
+	// editorSupport._("configureSourceViewerDecorationSupport",
+	// fSourceViewerDecorationSupport, viewer);
+	// fSourceViewerDecorationSupport.
+	// }
+	// return fSourceViewerDecorationSupport;
+	// }
 	private static class StyledTextPlaceHolder {
 		private final StyledText st;
 		private String placeholder;

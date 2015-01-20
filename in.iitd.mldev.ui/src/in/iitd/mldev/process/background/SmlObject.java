@@ -28,7 +28,7 @@ public abstract class SmlObject {
 		return name;
 	}
 
-	public SmlType getType() {
+	public final SmlType getType() {
 		return type;
 	}
 
@@ -50,12 +50,13 @@ public abstract class SmlObject {
 		public static final SmlType REAL_TYPE = new SmlType("real");
 		public static final SmlType STRING_TYPE = new SmlType("string");
 		public static final SmlType UNKNOWN_TYPE = new SmlType("__unknown");
+		public static final SmlType LIST_TYPE = new SmlType("list");
 
 		private String name;
 		private List<String> qualifier;
 		private static final Set<SmlType> TYPE_REGISTRY = new HashSet<SmlObject.SmlType>(
 				Arrays.asList(EXCEPTION_TYPE, FN_TYPE, RECORD_TYPE, TUPLE_TYPE,
-						CON_TYPE, INT_TYPE, REAL_TYPE, STRING_TYPE));
+						CON_TYPE, INT_TYPE, REAL_TYPE, STRING_TYPE,LIST_TYPE));
 
 		public SmlType(String name, String... qualifier) {
 			this.name = name;
@@ -74,6 +75,14 @@ public abstract class SmlObject {
 			SmlType type = new SmlType(newType);
 			TYPE_REGISTRY.add(type);
 			return type;
+		}
+
+		public static List<SmlType> parseTypes(String... types) {
+			if (types == null) {
+				return new ArrayList<SmlObject.SmlType>();
+
+			}
+			return parseTypes(Arrays.asList(types));
 		}
 
 		public static List<SmlType> parseTypes(Iterable<String> types) {
@@ -113,8 +122,5 @@ public abstract class SmlObject {
 		}
 	}
 
-	public static SmlObject parseObject(String obj) {
-		return null;
-	}
 
 }

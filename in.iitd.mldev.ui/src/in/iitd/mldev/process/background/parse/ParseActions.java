@@ -5,6 +5,7 @@ import in.iitd.mldev.process.background.SmlFunction;
 import in.iitd.mldev.process.background.SmlLineOutput;
 import in.iitd.mldev.process.background.SmlLineOutput.SmlErrorOutput;
 import in.iitd.mldev.process.background.SmlLineOutput.SmlWarningOutput;
+import in.iitd.mldev.process.background.SmlList;
 import in.iitd.mldev.process.background.SmlRecord;
 import in.iitd.mldev.process.background.SmlTuple;
 import in.iitd.mldev.process.background.SmlVal;
@@ -22,7 +23,7 @@ public class ParseActions {
 
 	public static List<SmlParseAction> getActions() {
 		return Arrays.asList(IGNORE_ACTION, MODULE_ACTION, IT_ACTION,
-				FUNCTION_ACTION, TUPLE_ACTION, RECORD_ACTION, VAL_ACTION, DATA_TYPE_ACTION,
+				FUNCTION_ACTION, TUPLE_ACTION, LIST_ACTION, RECORD_ACTION, VAL_ACTION, DATA_TYPE_ACTION,
 				EXCEPTION_ACTION, WARNING_ACTION, ERROR_ACTION);
 	}
 
@@ -106,6 +107,16 @@ public class ParseActions {
 			parser.getCurrent().add(
 					new SmlTuple(data[0], Arrays.asList(data[1].split(",")),
 							Arrays.asList(data[2].split("\\*"))));
+
+		}
+	};
+	private static final SmlParseAction LIST_ACTION = new SmlParseAction(
+			trim("val ([^=]+) = \\[([^\\]]+)\\] : (.*)")) {
+
+		@Override
+		protected void parse(SmlOutputParser parser, String... data) {
+			parser.getCurrent().add(
+					new SmlList(data[0], data[2], data[1].split(",")));
 
 		}
 	};

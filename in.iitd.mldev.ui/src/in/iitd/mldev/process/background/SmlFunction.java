@@ -1,7 +1,6 @@
 package in.iitd.mldev.process.background;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SmlFunction extends SmlObject {

@@ -1,24 +1,14 @@
 package in.iitd.mldev.ui.editor;
 
 import in.iitd.mldev.core.model.SmlProgram;
-import in.iitd.mldev.core.parse.ast.CaseExp;
-import in.iitd.mldev.core.parse.ast.Clause;
 import in.iitd.mldev.core.parse.ast.Dec;
-import in.iitd.mldev.core.parse.ast.Exp;
-import in.iitd.mldev.core.parse.ast.FlatAppExp;
-import in.iitd.mldev.core.parse.ast.FlatConPat;
-import in.iitd.mldev.core.parse.ast.FunBind;
-import in.iitd.mldev.core.parse.ast.FunDec;
-import in.iitd.mldev.core.parse.ast.LetExp;
-import in.iitd.mldev.core.parse.ast.Pat;
-import in.iitd.mldev.core.parse.ast.ValDec;
-import in.iitd.mldev.core.parse.ast.VarPat;
+import in.iitd.mldev.process.background.ISmlModule;
 import in.iitd.mldev.process.background.SmlFunction;
 import in.iitd.mldev.process.background.SmlModule;
 import in.iitd.mldev.process.background.SmlObject;
-import in.iitd.mldev.process.background.SmlProgramOutput;
-import in.iitd.mldev.process.background.SmlVal;
 import in.iitd.mldev.process.background.SmlObject.SmlType;
+import in.iitd.mldev.process.background.SmlVal;
+import in.iitd.mldev.process.background.parse.ISmlParseListener;
 import in.iitd.mldev.ui.SmlUiPlugin;
 import in.iitd.mldev.ui.handler.SmlParseHandler;
 
@@ -89,7 +79,7 @@ public class SmlContentAssistProcessor extends TemplateCompletionProcessor {
 
 	@Override
 	public char[] getCompletionProposalAutoActivationCharacters() {
-		return null;// new char[]{'a','b','c'};
+		return "abcdefg".toCharArray();
 	}
 
 	@Override
@@ -114,27 +104,28 @@ public class SmlContentAssistProcessor extends TemplateCompletionProcessor {
 		SmlProgram program = editor.getProgram();
 		List<ICompletionProposal> rtn = new ArrayList<ICompletionProposal>();
 
-		List<Dec> decs = program.getParseTree().decs;
+		// List<Dec> decs = program.getParseTree().decs;
 		SMLProposalGenerator generator = new SMLProposalGenerator(offset,
 				Prefix.create(prefix), program.getDocument());
 		rtn.addAll(generator.computeProgramProposals());
-		for (int i = 0; i < decs.size() && decs.get(i).getLeft() < offset; i++) {
-			Dec dec = decs.get(i);
-			List<ICompletionProposal> proposals = generator.parseDec(dec);
-			for (ICompletionProposal proposal : proposals) {
-				boolean exists = false;
-				for (ICompletionProposal existing : proposals) {
-					if (existing.getDisplayString().equals(
-							proposal.getDisplayString())) {
-						exists = true;
-						break;
-					}
-				}
-				if (!exists) {
-					rtn.add(proposal);
-				}
-			}
-		}
+		// for (int i = 0; i < decs.size() && decs.get(i).getLeft() < offset;
+		// i++) {
+		// Dec dec = decs.get(i);
+		// List<ICompletionProposal> proposals = generator.parseDec(dec);
+		// for (ICompletionProposal proposal : proposals) {
+		// boolean exists = false;
+		// for (ICompletionProposal existing : proposals) {
+		// if (existing.getDisplayString().equals(
+		// proposal.getDisplayString())) {
+		// exists = true;
+		// break;
+		// }
+		// }
+		// if (!exists) {
+		// rtn.add(proposal);
+		// }
+		// }
+		// }
 		return rtn.toArray(new ICompletionProposal[0]);
 	}
 
@@ -176,88 +167,88 @@ public class SmlContentAssistProcessor extends TemplateCompletionProcessor {
 			}
 		}
 
-		private List<ICompletionProposal> parseDec(Dec dec) {
-			if (dec instanceof FunDec) {
-				return parseFunDec((FunDec) dec);
-			} else if (dec instanceof ValDec) {
-				return parseValDec((ValDec) dec);
-			}
-			return list();
-		}
-
-		private List<ICompletionProposal> parseFunDec(FunDec dec) {
-			List<ICompletionProposal> rtn = list();
-			for (FunBind bind : dec.bindings) {
-				rtn.addAll(parseFunBinding(bind));
-			}
-
-			return rtn;
-		}
-
-		private List<ICompletionProposal> parseFunBinding(FunBind bind) {
-			List<ICompletionProposal> rtn = list();
-			rtn.addAll(parseClause(bind.clauses.get(0)));
-
-			return rtn;
-		}
-
-		private List<ICompletionProposal> parseClause(Clause clause) {
-			List<ICompletionProposal> rtn = list();
-
-			// if inside of the function add parameter names
-			if (clause.getLeft() <= offset && offset <= clause.getRight()) {
-				for (int i = 1; i < clause.pats.size(); i++) {
-					rtn.addAll(parsePat(clause.pats.get(i)));
-				}
-				// otherwise only add function name
-			} else {
-				rtn.addAll(parsePat(clause.pats.get(0)));
-			}
-
-			rtn.addAll(parseExp(clause.exp));
-			return rtn;
-		}
-
-		private List<ICompletionProposal> parsePat(Pat p) {
-			if (p instanceof VarPat)
-				return parseVarPat((VarPat) p);
-			return list();
-		}
-
-		private List<ICompletionProposal> parseVarPat(VarPat pat) {
-			return list(createProposal(pat.ident.name));
-		}
-
-		private List<ICompletionProposal> parseExp(Exp exp) {
-			if (exp instanceof LetExp) {
-				return parseLetExp(((LetExp) exp));
-			} else if (exp instanceof CaseExp) {
-
-			} else if (exp instanceof FlatAppExp) {
-				List<ICompletionProposal> rtn = list();
-				for (Exp childExp : ((FlatAppExp) exp).exps) {
-					rtn.addAll(parseExp(childExp));
-				}
-				return rtn;
-			}
-			return list();
-		}
-
-		private List<ICompletionProposal> parseLetExp(LetExp letExp) {
-			if (letExp.getLeft() < offset && letExp.getRight() > offset) {
-				List<ICompletionProposal> rtn = list();
-				for (Dec dec : letExp.decs) {
-					rtn.addAll(parseDec(dec));
-				}
-				return rtn;
-			}
-			return list();
-		}
-
-		private List<ICompletionProposal> parseValDec(ValDec dec) {
-			return list(createProposal(((VarPat) ((FlatConPat) dec.bindings
-					.get(0).pat).pats.get(0)).ident.name));
-		}
+		// private List<ICompletionProposal> parseDec(Dec dec) {
+		// if (dec instanceof FunDec) {
+		// return parseFunDec((FunDec) dec);
+		// } else if (dec instanceof ValDec) {
+		// return parseValDec((ValDec) dec);
+		// }
+		// return list();
+		// }
+		//
+		// private List<ICompletionProposal> parseFunDec(FunDec dec) {
+		// List<ICompletionProposal> rtn = list();
+		// for (FunBind bind : dec.bindings) {
+		// rtn.addAll(parseFunBinding(bind));
+		// }
+		//
+		// return rtn;
+		// }
+		//
+		// private List<ICompletionProposal> parseFunBinding(FunBind bind) {
+		// List<ICompletionProposal> rtn = list();
+		// rtn.addAll(parseClause(bind.clauses.get(0)));
+		//
+		// return rtn;
+		// }
+		//
+		// private List<ICompletionProposal> parseClause(Clause clause) {
+		// List<ICompletionProposal> rtn = list();
+		//
+		// // if inside of the function add parameter names
+		// if (clause.getLeft() <= offset && offset <= clause.getRight()) {
+		// for (int i = 1; i < clause.pats.size(); i++) {
+		// rtn.addAll(parsePat(clause.pats.get(i)));
+		// }
+		// // otherwise only add function name
+		// } else {
+		// rtn.addAll(parsePat(clause.pats.get(0)));
+		// }
+		//
+		// rtn.addAll(parseExp(clause.exp));
+		// return rtn;
+		// }
+		//
+		// private List<ICompletionProposal> parsePat(Pat p) {
+		// if (p instanceof VarPat)
+		// return parseVarPat((VarPat) p);
+		// return list();
+		// }
+		//
+		// private List<ICompletionProposal> parseVarPat(VarPat pat) {
+		// return list(createProposal(pat.ident.name));
+		// }
+		//
+		// private List<ICompletionProposal> parseExp(Exp exp) {
+		// if (exp instanceof LetExp) {
+		// return parseLetExp(((LetExp) exp));
+		// } else if (exp instanceof CaseExp) {
+		//
+		// } else if (exp instanceof FlatAppExp) {
+		// List<ICompletionProposal> rtn = list();
+		// for (Exp childExp : ((FlatAppExp) exp).exps) {
+		// rtn.addAll(parseExp(childExp));
+		// }
+		// return rtn;
+		// }
+		// return list();
+		// }
+		//
+		// private List<ICompletionProposal> parseLetExp(LetExp letExp) {
+		// if (letExp.getLeft() < offset && letExp.getRight() > offset) {
+		// List<ICompletionProposal> rtn = list();
+		// for (Dec dec : letExp.decs) {
+		// rtn.addAll(parseDec(dec));
+		// }
+		// return rtn;
+		// }
+		// return list();
+		// }
+		//
+		// private List<ICompletionProposal> parseValDec(ValDec dec) {
+		// return list(createProposal(((VarPat) ((FlatConPat) dec.bindings
+		// .get(0).pat).pats.get(0)).ident.name));
+		// }
 
 		private ICompletionProposal createProposal(String name) {
 			return createProposal(name, null);
@@ -287,21 +278,22 @@ public class SmlContentAssistProcessor extends TemplateCompletionProcessor {
 		}
 
 		private List<ICompletionProposal> computeProgramProposals() {
-			if (SmlParseHandler.getOutput() == null) {
+			SmlModule root = editor.getRoot();
+			if (root == null) {
 				return list();
 			}
-			return parseOutput(SmlParseHandler.getOutput(), true);
+			return parseOutput(root, true);
 
 		}
 
-		private List<ICompletionProposal> parseOutput(SmlModule module,
+		private List<ICompletionProposal> parseOutput(ISmlModule module,
 				boolean root) {
 			List<ICompletionProposal> rtn = new ArrayList<ICompletionProposal>();
 
 			for (SmlObject obj : filterObjects(module.getDeclaredObjects())) {
 				rtn.add(createProposal(obj));
 			}
-			for (SmlModule child : module.getModules()) {
+			for (ISmlModule child : module.getModules()) {
 				rtn.addAll(parseOutput(child, false));
 			}
 
@@ -326,14 +318,11 @@ public class SmlContentAssistProcessor extends TemplateCompletionProcessor {
 			if (obj.getClass() == SmlFunction.class) {
 				SmlFunction fn = (SmlFunction) obj;
 				return createProposal(fn.getName(), fn.params());
-			} else if (obj.getClass() == SmlVal.class) {
-				SmlVal val = (SmlVal) obj;
-				return createProposal(val.getName(), val.getValue() + " : "
-						+ val.getType());
-			}
-			return null;
-		}
+			} else {
+				return createProposal(obj.getName(), obj.toString());
 
+			}
+		}
 	}
 
 	@Override
