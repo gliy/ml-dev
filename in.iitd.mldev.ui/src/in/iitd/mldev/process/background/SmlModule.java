@@ -3,11 +3,14 @@ package in.iitd.mldev.process.background;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class SmlModule implements ISmlModule {
-	private List<SmlObject> objects;
+	//set allows us to only suggest the last function if 2 functions share the same name
+	private Set<SmlObject> objects;
 	private List<SmlLineOutput> errors;
 	private Map<String, ISmlModule> modules;
 	private ISmlModule parent;
@@ -18,7 +21,7 @@ public class SmlModule implements ISmlModule {
 	public SmlModule(String name, ISmlModule parent) {
 		this.name = name;
 		this.parent = parent;
-		this.objects = new ArrayList<SmlObject>();
+		this.objects = new LinkedHashSet<SmlObject>();
 		this.errors = new ArrayList<SmlLineOutput>();
 		this.modules = new HashMap<String, ISmlModule>();
 	}
@@ -86,7 +89,7 @@ public class SmlModule implements ISmlModule {
 	 * @see in.iitd.mldev.process.background.ISmlModule#getDeclaredObjects()
 	 */
 	@Override
-	public List<SmlObject> getDeclaredObjects() {
+	public Collection<SmlObject> getDeclaredObjects() {
 		return objects;
 	}
 	/* (non-Javadoc)

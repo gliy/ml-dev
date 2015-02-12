@@ -19,6 +19,8 @@ public class PreferenceConstants {
 	public static final String SML_COMMENT_COLOR = "in.iitd.mldev.smlCommentColor";
 	public static final String SML_INT_COLOR = "in.iitd.mldev.smlIntColor";
 	public static final String SML_REAL_COLOR = "in.iitd.mldev.smlRealColor";
+	public static final String SML_LIST_COLOR = "in.iitd.mldev.smlListColor";
+	public static final String SML_RECORD_COLOR = "in.iitd.mldev.smlRecordColor";
 	/** Integer attribute for the tab width. */
 	public static final String SML_TAB_WIDTH = "in.iitd.mldev.smlTabWidth";
 	/** Boolean attribute for whether to mark syntax errors in the editor. */
@@ -37,6 +39,9 @@ public class PreferenceConstants {
 	};
 	public static final String TEMPLATE_KEY = "in.iitd.mldev.templatestore";
 	public static final String SML_REPL_HINTS = "in.iitd.mldev.replhints";
+	public static final String SML_AA_CHARS = "ii.iitd.mldev.aa.chars";
+	public static final String SML_AA_DELAY = "ii.iitd.mldev.aa.delay";
+	
 
 	private PreferenceConstants(){}
 }

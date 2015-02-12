@@ -30,6 +30,8 @@ public class SmlMainPreferencePage extends FieldEditorPreferencePage implements 
 		addField(new ColorFieldEditor(PreferenceConstants.SML_COMMENT_COLOR, "Comment colour:", getFieldEditorParent()));
 		addField(new ColorFieldEditor(PreferenceConstants.SML_INT_COLOR, "Integer colour:", getFieldEditorParent()));
 		addField(new ColorFieldEditor(PreferenceConstants.SML_REAL_COLOR, "Real colour:", getFieldEditorParent()));
+		addField(new ColorFieldEditor(PreferenceConstants.SML_LIST_COLOR, "List colour:", getFieldEditorParent()));
+		addField(new ColorFieldEditor(PreferenceConstants.SML_RECORD_COLOR, "Record colour:", getFieldEditorParent()));
 		addField(new IntegerFieldEditor(PreferenceConstants.SML_TAB_WIDTH, "Tab width:", getFieldEditorParent()));
 		addField(new BooleanFieldEditor(PreferenceConstants.SML_MARK_ERRORS, "Mark syntax errors in editor", getFieldEditorParent()));
 	}

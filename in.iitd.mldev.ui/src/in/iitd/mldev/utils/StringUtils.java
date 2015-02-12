@@ -1,5 +1,7 @@
 package in.iitd.mldev.utils;
 
+import java.util.Collection;
+
 public final class StringUtils {
 
 	private StringUtils () { /* Not intended to be instanciated */ }
@@ -15,9 +17,12 @@ public final class StringUtils {
 	public static String safeString(String s) { return (s == null) ? "" : s; }
 
 	
-	public static String join(Iterable<? extends Object> objs, String sep) {
+	public static String join(Collection<? extends Object> objs, String sep) {
 		StringBuilder bu = new StringBuilder();
 		if(objs != null) {
+			if(objs.isEmpty()) {
+				return "";
+			}
 			for (Object obj : objs) {
 				bu.append(obj).append(sep);
 			}

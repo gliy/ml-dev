@@ -1,10 +1,18 @@
 package in.iitd.mldev.process.background;
 
+import in.iitd.mldev.core.model.SmlBinding;
+import in.iitd.mldev.ui.SmlUiPlugin;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 
 public abstract class SmlObject {
 
@@ -40,6 +48,14 @@ public abstract class SmlObject {
 
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if(o == null || !(o instanceof SmlObject)) {
+			return false;
+		}
+		SmlObject so = (SmlObject)o;
+		return name.equals(so.name);
+	}
 	public static class SmlType {
 		public static final SmlType EXCEPTION_TYPE = new SmlType("exception");
 		public static final SmlType FN_TYPE = new SmlType("function");
@@ -56,7 +72,8 @@ public abstract class SmlObject {
 		private List<String> qualifier;
 		private static final Set<SmlType> TYPE_REGISTRY = new HashSet<SmlObject.SmlType>(
 				Arrays.asList(EXCEPTION_TYPE, FN_TYPE, RECORD_TYPE, TUPLE_TYPE,
-						CON_TYPE, INT_TYPE, REAL_TYPE, STRING_TYPE,LIST_TYPE));
+						CON_TYPE, INT_TYPE, REAL_TYPE, STRING_TYPE, LIST_TYPE));
+		private static final Map<String, Image> typeToImage = new HashMap<String, Image>();
 
 		public SmlType(String name, String... qualifier) {
 			this.name = name;
@@ -83,6 +100,25 @@ public abstract class SmlObject {
 
 			}
 			return parseTypes(Arrays.asList(types));
+		}
+
+		public Image getImage() {
+			return getImage(this);
+		}
+		
+		private Image getImage(SmlType element) {
+			//TODO:FIX
+			if(1==1)return null;
+			Image image = (Image) typeToImage.get(element.name);
+			if (image == null) {
+				String url = "/icons/contentassist/" + element.name + ".gif";
+				ImageDescriptor descriptor = ImageDescriptor
+						.createFromURL(SmlUiPlugin.getDefault().getBundle()
+								.getEntry(url));
+				image = descriptor.createImage();
+				typeToImage.put(element.name, image);
+			}
+			return image;
 		}
 
 		public static List<SmlType> parseTypes(Iterable<String> types) {
@@ -121,6 +157,5 @@ public abstract class SmlObject {
 			return name;
 		}
 	}
-
 
 }

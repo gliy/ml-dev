@@ -1,12 +1,11 @@
 package in.iitd.mldev.ui.handler;
 
-import java.util.List;
-
 import in.iitd.mldev.core.model.SmlBinding;
 import in.iitd.mldev.core.model.SmlProgram;
-import in.iitd.mldev.core.parse.ast.Dec;
-import in.iitd.mldev.core.parse.ast.FunDec;
 import in.iitd.mldev.ui.editor.SmlEditor;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -21,7 +20,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 
 public class SmlOpenDeclarationHandler extends AbstractHandler {
-
+	private static final String TERMINATING_CHARACTERS = "=\n\r ;),(|{}+-/><[]~\"'";
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IEditorPart editor = PlatformUI.getWorkbench()
@@ -35,6 +34,7 @@ public class SmlOpenDeclarationHandler extends AbstractHandler {
 		ISelection selection = selectionProvider.getSelection();
 		try {
 			if (selection instanceof ITextSelection) {
+				int left;
 				ITextSelection textSelection = (ITextSelection) selection;
 				String selectionText = textSelection.getText();
 				if (selectionText.isEmpty()) {
@@ -42,7 +42,7 @@ public class SmlOpenDeclarationHandler extends AbstractHandler {
 					int offset = textSelection.getOffset(); // etc.
 					IDocument document = smlEditor.getDocumentProvider()
 							.getDocument(editor.getEditorInput());
-					int backOffset = searchBackwards(offset, document);
+					int backOffset = searchBackwards(offset - 1, document);
 					int forwardOffset = searchForwards(offset, document);
 					selectionText = document.get(backOffset, forwardOffset
 							- backOffset);
@@ -50,7 +50,13 @@ public class SmlOpenDeclarationHandler extends AbstractHandler {
 							+ document.get(backOffset, forwardOffset
 									- backOffset));
 
-					gotoDeclaration(backOffset, selectionText.trim(), smlEditor.getProgram(), selectionProvider);
+					left = gotoDeclaration(backOffset, selectionText.trim(), smlEditor.getProgram(), selectionProvider);
+				} else {
+					int backOffset = textSelection.getOffset() - textSelection.getLength();
+					left = gotoDeclaration(backOffset, selectionText.trim(), smlEditor.getProgram(), selectionProvider);
+				}
+				if(left >= 0) {
+					selectionProvider.setSelection(new TextSelection(left, 0));
 				}
 
 			}
@@ -60,24 +66,19 @@ public class SmlOpenDeclarationHandler extends AbstractHandler {
 		return null;
 	}
 
-	private void gotoDeclaration(int from, 
+	private int gotoDeclaration(int from, 
 			String selectionText, SmlProgram program, ISelectionProvider selectionProvider) {
-		// List<Dec> decs = program.getParseTree().decs;
+		int maxLeft = -1;
+		// if a function/val is defined twice, always choose the last one(in scope)
 		for (SmlBinding binding : program.getBindings()) {
 			if (binding.getLeft() > from) {
-				return;
-			}
-			if (binding.getIdent().name.equals(selectionText)) {
-				selectionProvider.setSelection(new TextSelection(binding.getLeft(), 0));
-				return;
+				
+			}else if (binding.getIdent().name.equals(selectionText)) {
+				maxLeft = Math.max(binding.getLeft(), maxLeft);
 			}
 			
 		}
-		// for (Dec dec : decs) {
-		// if(dec instanceof FunDec) {
-		// System.out.println("DEC");
-		// }
-		// }
+		return maxLeft;
 
 	}
 
@@ -85,19 +86,20 @@ public class SmlOpenDeclarationHandler extends AbstractHandler {
 			throws BadLocationException {
 		int i = start;
 		char c = document.getChar(start);
-		while (i > 0 && c != '.' && c != '\n') {
+		while (i > 0 && !TERMINATING_CHARACTERS.contains("" + c)) {
 			i--;
 			c = document.getChar(i);
 		}
 		return i;
 	}
+	
 
 	private int searchForwards(int start, IDocument document)
 			throws BadLocationException {
 		int i = start;
 		char c = document.getChar(start);
 		int length = document.getLength();
-		while (i < length && c != '.' && c != '\n' && c != ' ') {
+		while (i < length && !TERMINATING_CHARACTERS.contains("" + c)) {
 			i++;
 			c = document.getChar(i);
 		}

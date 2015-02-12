@@ -82,10 +82,14 @@ public class SmlUiPlugin extends AbstractUIPlugin {
 		PreferenceConverter.setDefault(store, PreferenceConstants.SML_COMMENT_COLOR, new RGB(0,128,0));
 		PreferenceConverter.setDefault(store, PreferenceConstants.SML_INT_COLOR, new RGB(128,128,0));
 		PreferenceConverter.setDefault(store, PreferenceConstants.SML_REAL_COLOR, new RGB(128,128,50));
+		PreferenceConverter.setDefault(store, PreferenceConstants.SML_LIST_COLOR, new RGB(0,0,0));
+		PreferenceConverter.setDefault(store, PreferenceConstants.SML_RECORD_COLOR, new RGB(0,0,0));
 		store.setDefault( PreferenceConstants.SML_REPL_HINTS,true);
 		setupRainbowParenDefaults(store);
 		store.setDefault(PreferenceConstants.SML_TAB_WIDTH, 2);
 		store.setDefault(PreferenceConstants.SML_MARK_ERRORS, true);
+		store.setDefault(PreferenceConstants.SML_AA_DELAY, 400);
+		store.setDefault(PreferenceConstants.SML_AA_CHARS, "(abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMOPQRSTUVWXYZ");
 	}
 
 	private void setupRainbowParenDefaults(IPreferenceStore store) {

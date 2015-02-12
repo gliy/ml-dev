@@ -28,9 +28,15 @@
      </page>
      <page
            category="in.iitd.mldev.ui.SmlMainPreferencePage"
-           class="in.iitd.mldev.ui.template.SMLTemplatePage"
+           class="in.iitd.mldev.ui.preferences.SmlTemplatePreferencePage"
            id="in.iitd.mldev.ui.page1"
            name="SML Templates">
+     </page>
+     <page
+           category="in.iitd.mldev.ui.SmlMainPreferencePage"
+           class="in.iitd.mldev.ui.preferences.SmlContentAssistPreferencePage"
+           id="in.iitd.mldev.ui.prefs.contentAssist"
+           name="Content Assist">
      </page>
   </extension>
   <extension
@@ -121,6 +127,26 @@
         <pattern>
            case ${VAR} of
     ${CASE} =&gt; ${ACTION}
+        </pattern>
+     </template>
+     <template
+           autoinsert="true"
+           contextTypeId="in.iitd.mldev.ui.SMLContextType"
+           description="val statement"
+           id="in.iitd.mldev.ui.valTemplate"
+           name="val">
+        <pattern>
+           val ${NAME} = ${VAL};
+        </pattern>
+     </template>
+     <template
+           autoinsert="true"
+           contextTypeId="in.iitd.mldev.ui.SMLContextType"
+           description="fun statement"
+           id="in.iitd.mldev.ui.funTemplate"
+           name="fun">
+        <pattern>
+           fun ${NAME} ${ARGS} = ${VAL};
         </pattern>
      </template>
   </extension>

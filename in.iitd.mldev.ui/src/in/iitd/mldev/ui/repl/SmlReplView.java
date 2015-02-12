@@ -37,6 +37,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
@@ -61,12 +62,10 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 	private StyledTextPlaceHolder placeholder;
 	private IConsole console;
 	private ILaunch launch;
-	private String sessionId;
 	public StyledText viewerWidget;
 	private SourceViewerDecorationSupport fSourceViewerDecorationSupport;
-	private static final Pattern boostIndent = Pattern.compile("^",
-			Pattern.MULTILINE);
 	public static final String VIEW_ID = "in.iitd.mldev.ui.smlREPLView";
+	
 	public static final AtomicReference<SmlReplView> activeREPL = new AtomicReference<SmlReplView>();
 
 	private ISmlProcess program;
@@ -78,8 +77,6 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 	@Override
 	public void dispose() {
 		super.dispose();
-
-		System.out.println("DISPOSED");
 		if (this.program != null) {
 			this.program.terminate();
 
@@ -156,6 +153,7 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 		logPanel = new StyledText(split, SWT.V_SCROLL | SWT.WRAP);
 		logPanel.setIndent(4);
 		logPanel.setEditable(false);
+		
 		logPanel.setFont(JFaceResources.getFont(JFaceResources.TEXT_FONT));
 		viewer = new SmlSourceViewer(split, null, null, false, SWT.V_SCROLL
 				| SWT.H_SCROLL);
@@ -167,18 +165,12 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 		fSourceViewerDecorationSupport.install(prefs);
 		viewer.configure(viewerConfig);
 		viewerWidget = viewer.getTextWidget();
-
+		
 		getViewSite().setSelectionProvider(viewer);
 		viewer.setDocument(new Document());
 		final StyledText st = (StyledText) viewer.getControl();
 		setPlaceHolder(st, "<type SML code here>");
 
-		installMessageDisplayer(viewerWidget, new MessageProvider() {
-			@Override
-			public String getMessageText() {
-				return getEvaluationHint();
-			}
-		});
 
 		logPanel.addModifyListener(new ModifyListener() {
 
@@ -193,93 +185,7 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 
 	}
 
-	private interface MessageProvider {
-		String getMessageText();
-	}
 
-	private void installMessageDisplayer(final StyledText textViewer,
-			final MessageProvider hintProvider) {
-		textViewer.addListener(SWT.Paint, new Listener() {
-			private int getScrollbarAdjustment() {
-				if (!Platform.getOS().equals(Platform.OS_MACOSX))
-					return 0;
-
-				// You cannot reliably determine if a scrollbar is visible or
-				// not
-				// (http://stackoverflow.com/questions/5674207)
-				// So, we need to determine if the vertical scrollbar is
-				// "needed" based
-				// on the contents in the viewer
-				Rectangle clientArea = textViewer.getClientArea();
-				int textLength = textViewer.getText().length();
-				if (textLength == 0
-						|| textViewer.getTextBounds(0,
-								Math.max(0, textLength - 1)).height < clientArea.height) {
-					return textViewer.getVerticalBar().getSize().x;
-				} else {
-					return 0;
-				}
-			}
-
-			@Override
-			public void handleEvent(Event event) {
-				String message = hintProvider.getMessageText();
-				if (message == null)
-					return;
-
-				// keep the 'tooltip' using the default font
-				event.gc.setFont(JFaceResources
-						.getFont(JFaceResources.DEFAULT_FONT));
-
-				Point topRightPoint = topRightPoint(textViewer.getClientArea());
-				int sWidth = textWidthPixels(message, event);
-				int x = Math.max(topRightPoint.x - sWidth
-						+ getScrollbarAdjustment(), 0);
-				int y = topRightPoint.y;
-
-				// the text widget doesn't know we're painting the hint, so it
-				// won't necessarily
-				// clear old presentations of it; this leads to streaking on
-				// Windows if we don't
-				// clear the foreground explicitly
-				Color fg = event.gc.getForeground();
-				event.gc.setForeground(event.gc.getBackground());
-				event.gc.drawRectangle(textViewer.getClientArea());
-				event.gc.setForeground(fg);
-				event.gc.setAlpha(200);
-				event.gc.drawText(message, x, y, true);
-			}
-
-			private Point topRightPoint(Rectangle clipping) {
-				return new Point(clipping.x + clipping.width, clipping.y);
-			}
-
-			private int textWidthPixels(String text, Event evt) {
-				int width = 0;
-				for (int i = 0; i < text.length(); i++) {
-					width += evt.gc.getAdvanceWidth(text.charAt(i));
-				}
-				return width;
-			}
-		});
-	}
-
-	private String getEvaluationHint() {
-		if (!getPreferences().getBoolean(PreferenceConstants.SML_REPL_HINTS))
-			return null;
-		return "";
-
-		// if
-		// (getPreferences().getBoolean(PreferenceConstants.REPL_VIEW_AUTO_EVAL_ON_ENTER_ACTIVE))
-		// {
-		// return Messages.REPLView_autoEval_on_Enter_active;
-		// } else {
-		// return Messages.format(Messages.REPLView_autoEval_on_Enter_inactive,
-		// Platform.getOS().equals(Platform.OS_MACOSX)
-		// ? "Cmd"
-		// : "Ctrl");
-		// }
-	}
 
 	private void setPlaceHolder(final StyledText st, final String placeholder) {
 		final IPropertyChangeListener replHintsListener = new IPropertyChangeListener() {
@@ -326,8 +232,7 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 
 	@Override
 	public void setFocus() {
-		// TODO Auto-generated method stub
-
+		viewerWidget.setFocus();
 	}
 
 	private IPreferenceStore getPreferences() {
@@ -348,9 +253,9 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 
 	private void copyToLog(StyledText s) {
 		// sadly, need to reset text on the ST in order to get formatting/style
-		// ranges...
-		s.setText(boostIndent.matcher(s.getText()).replaceAll("   ")
-				.replaceFirst("^\\s+", "=> "));
+		// // ranges...
+		// s.setText(boostIndent.matcher(s.getText()).replaceAll("   ")
+		// .replaceFirst("^\\s+", "=> "));
 		int start = logPanel.getCharCount();
 		try {
 			for (StyleRange sr : s.getStyleRanges()) {
@@ -366,48 +271,20 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 		return s.trim();
 	}
 
-	public void evalExpression(String s, boolean addToHistory,
-			boolean printToLog, boolean repeatLastREPLEvalIfActive) {
-		try {
-			if (s.trim().length() > 0) {
-				program.send(s);
-
-				// if (printToLog) viewHelpers._("log", this, logPanel, s,
-				// inputExprLogType);
-
-				// final Object ret = evalExpression.invoke(s, addToHistory);
-
-				// if (repeatLastREPLEvalIfActive &&
-				// autoRepeatLastAction.isChecked()) {
-				// final String lastREPLExpr =
-				// getLastExpressionSentFromREPL();
-				// if (!StringUtils.isBlank(lastREPLExpr)) {
-				// new Thread(new Runnable() {
-				// @Override
-				// public void run() {
-				// if (hasEvalResponseException(ret))
-				// return;
-				// evalExpression(lastREPLExpr, false, false, false);
-				// }
-				// }).start();
-				// }
-				// }
-			}
-
-		} catch (Exception e) {
-
-			SmlLog.logError(e);
-		}
-	}
 
 	private void evalExpression() {
 		// We remove trailing spaces so that we do not embark extra spaces,
 		// newlines, etc. for example when evaluating after having hit the
 		// Enter key (which automatically adds a new line
 		viewerWidget.setText(removeTrailingSpaces(viewerWidget.getText()));
-		evalExpression(viewerWidget.getText(), true, false, false);
-		if (viewerWidget.getText().trim().length() > 0) {
-			// lastExpressionSentFromREPL = viewerWidget.getText();
+		String s = viewerWidget.getText();
+		if (s.trim().length() > 0) {
+			try {
+				program.send(s);
+			} catch (Exception e) {
+				SmlLog.logError(e);
+			}
+			
 		}
 		copyToLog(viewerWidget);
 		viewerWidget.setText("");
@@ -470,28 +347,14 @@ public class SmlReplView extends ViewPart implements IAdaptable {
 		int count = 0;
 		for(char c : text.toCharArray()) {
 			if(c == '(') {
-				count ++;
+				count++;
 			} else if (c== ')') {
 				count--;
 			}
 		}
 		return count == 0;
 	}
-	// protected SourceViewerDecorationSupport
-	// getSourceViewerDecorationSupport(ISourceViewer viewer) {
-	// if (fSourceViewerDecorationSupport == null) {
-	// fSourceViewerDecorationSupport= new SourceViewerDecorationSupport(
-	// viewer,
-	// null/*getOverviewRuler()*/,
-	// null/*getAnnotationAccess()*/,
-	// EditorsPlugin.getDefault().getSharedTextColors()/*getSharedColors()*/
-	// );
-	// editorSupport._("configureSourceViewerDecorationSupport",
-	// fSourceViewerDecorationSupport, viewer);
-	// fSourceViewerDecorationSupport.
-	// }
-	// return fSourceViewerDecorationSupport;
-	// }
+	
 	private static class StyledTextPlaceHolder {
 		private final StyledText st;
 		private String placeholder;

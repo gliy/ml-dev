@@ -6,6 +6,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.BufferedRuleBasedScanner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.IRule;
+import org.eclipse.jface.text.rules.MultiLineRule;
 import org.eclipse.jface.text.rules.Token;
 
 /**
@@ -25,7 +26,8 @@ import org.eclipse.jface.text.rules.Token;
 public class SmlPartitionScanner extends BufferedRuleBasedScanner implements IPartitionTokenScanner {
 
 	public static final String[] CONTENT_TYPES = new String[] {IDocument.DEFAULT_CONTENT_TYPE, 
-		SmlTokenTypes.STRING, SmlTokenTypes.COMMENT, SmlTokenTypes.CHAR, SmlTokenTypes.INT, SmlTokenTypes.REAL};
+		SmlTokenTypes.STRING, SmlTokenTypes.COMMENT, SmlTokenTypes.CHAR, SmlTokenTypes.INT, SmlTokenTypes.REAL,
+		SmlTokenTypes.LIST, SmlTokenTypes.RECORD};
 	
 	/** Creates and initializes a new partition scanner. */
 	public SmlPartitionScanner () {
@@ -34,7 +36,9 @@ public class SmlPartitionScanner extends BufferedRuleBasedScanner implements IPa
 		IRule stringRule = new SmlStringRule(new Token(SmlTokenTypes.STRING));
 		IRule charRule = new SmlCharRule(new Token(SmlTokenTypes.CHAR));
 		IRule intRule = new SmlNumericRule(new Token(SmlTokenTypes.INT), new Token(SmlTokenTypes.REAL));
-		setRules(new IRule[] {commentRule, charRule, stringRule, intRule});
+		IRule listRule = new MultiLineRule("[", "]", new Token(SmlTokenTypes.LIST));
+		IRule recordRule = new MultiLineRule("{", "}", new Token(SmlTokenTypes.RECORD));
+		setRules(new IRule[] {commentRule, charRule, stringRule, intRule, listRule,recordRule});
 	}
 	
 	public void setPartialRange (IDocument document, int offset, int length, String contentType, int partitionOffset) {

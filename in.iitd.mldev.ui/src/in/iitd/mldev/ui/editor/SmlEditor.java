@@ -77,10 +77,16 @@ public class SmlEditor extends TextEditor implements ISmlProgramListener,
 		setSourceViewerConfiguration(new SmlSourceViewerConfiguration(this));
 		setRangeIndicator(new DefaultRangeIndicator());
 		showOverviewRuler();
-		setKeyBindingScopes(new String[] { "in.iitd.mldev.ui.editor.context" });
+		
 		this.annotationModel = new SmlRuler();
 	}
 
+	@Override
+	protected void initializeKeyBindingScopes() {
+		setKeyBindingScopes(new String[] { "in.iitd.mldev.ui.editor.context" });
+
+	}
+	
 	@Override
 	protected CompositeRuler createCompositeRuler() {
 		CompositeRuler ruler = super.createCompositeRuler();
@@ -104,6 +110,7 @@ public class SmlEditor extends TextEditor implements ISmlProgramListener,
 		if (adapter.equals(IGotoMarker.class)) {
 			return super.getAdapter(adapter);
 		}
+		
 		return super.getAdapter(adapter);
 	}
 
@@ -124,6 +131,13 @@ public class SmlEditor extends TextEditor implements ISmlProgramListener,
 					getEditorInput());
 			program = new SmlProgram(document);
 			program.addListener(this);
+			IFile file = ((IFileEditorInput) getEditorInput()).getFile();
+			if (file != null) {
+				this.root = new SmlModule(file.getName());
+				this.process = SmlLauncher.launch(file, new SmlOutputParser(
+						new SmlListeningModule(root, errorListener(file))));
+			}
+
 		}
 		return program;
 	}
@@ -172,6 +186,8 @@ public class SmlEditor extends TextEditor implements ISmlProgramListener,
 				attributes.put(IMarker.MESSAGE, "Syntax error");
 				attributes.put(IMarker.CHAR_START,
 						new Integer(problems[i].getOffset()));
+				attributes.put(IMarker.LINE_NUMBER, program.getDocument()
+						.getLineOfOffset(problems[i].getOffset()));
 				attributes.put(
 						IMarker.CHAR_END,
 						new Integer(problems[i].getOffset()
@@ -184,21 +200,23 @@ public class SmlEditor extends TextEditor implements ISmlProgramListener,
 
 		} catch (CoreException e) {
 			e.printStackTrace();
+		} catch (BadLocationException e) {
+			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public SmlModule getRoot() {
 		return root;
 	}
+
 	@Override
 	public void doSave(IProgressMonitor progressMonitor) {
 		IFile file = ((IFileEditorInput) getEditorInput()).getFile();
 		removeErrorMarkers();
 		this.root = new SmlModule(file.getName());
 		this.process = SmlLauncher.launch(file, new SmlOutputParser(
-				new SmlListeningModule(root,
-						errorListener(file))));
+				new SmlListeningModule(root, errorListener(file))));
 
 		super.doSave(progressMonitor);
 	}
@@ -225,7 +243,7 @@ public class SmlEditor extends TextEditor implements ISmlProgramListener,
 			attributes.put(IMarker.TRANSIENT, Boolean.TRUE);
 			MarkerUtilities.createMarker(file, attributes, IMarker.PROBLEM);
 		} catch (BadLocationException ex) {
-
+			ex.printStackTrace();
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}

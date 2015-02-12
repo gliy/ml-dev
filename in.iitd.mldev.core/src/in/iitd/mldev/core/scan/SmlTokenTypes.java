@@ -18,6 +18,8 @@ public class SmlTokenTypes {
 	public static final String CHAR = "in.iitd.mldev.smlChar";
 	/** Identifies an SML comment. */
 	public static final String COMMENT = "in.iitd.mldev.smlComment";
+	public static final String LIST = "in.iitd.mldev.smlList";
+	public static final String RECORD = "in.iitd.mldev.smlRecord";
 
 	/** There's no point in instantiating this class. */
 	private SmlTokenTypes () {}

@@ -20,7 +20,7 @@ public interface ISmlModule {
 
 	public abstract List<SmlLineOutput> getErrors();
 
-	public abstract List<SmlObject> getDeclaredObjects();
+	public abstract Collection<SmlObject> getDeclaredObjects();
 
 	public abstract String getName();
 

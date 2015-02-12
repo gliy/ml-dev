@@ -1,4 +1,4 @@
-package in.iitd.mldev.ui.template;
+package in.iitd.mldev.ui.preferences;
 
 import java.io.IOException;
 
@@ -10,10 +10,10 @@ import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 import org.eclipse.ui.texteditor.templates.TemplatePreferencePage;
 
-public class SMLTemplatePage extends TemplatePreferencePage {
+public class SmlTemplatePreferencePage extends TemplatePreferencePage {
 
 	
-	public SMLTemplatePage() {
+	public SmlTemplatePreferencePage() {
 		super();
 		ContributionContextTypeRegistry registry = SmlUiPlugin.getDefault().getRegistry();
 		IPreferenceStore prefStore = SmlUiPlugin.getDefault().getPreferenceStore();

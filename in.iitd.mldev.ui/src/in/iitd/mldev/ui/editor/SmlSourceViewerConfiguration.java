@@ -8,6 +8,10 @@ import in.iitd.mldev.ui.SmlUiPlugin;
 import in.iitd.mldev.ui.text.SingleTokenScanner;
 import in.iitd.mldev.ui.text.SmlTextStyleScanner;
 
+import java.util.Iterator;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
@@ -17,10 +21,12 @@ import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
+import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.DefaultAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.ui.editors.text.TextSourceViewerConfiguration;
+import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 /** Bundles the configuration of an SmlEditor. Sets up its default document
  * partitioning, syntax highlighting, tab width, and the reconciler that
@@ -50,8 +56,26 @@ public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration 
 	}
 	
 	@Override
-	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
-		return new DefaultAnnotationHover();
+	public IAnnotationHover getOverviewRulerAnnotationHover(
+			ISourceViewer sourceViewer) {
+		return new DefaultAnnotationHover() {
+			
+			@Override
+			public String getHoverInfo(ISourceViewer sourceViewer,
+					int lineNumber) {
+				Iterator annotationIterator = sourceViewer.getAnnotationModel().getAnnotationIterator();
+				while(annotationIterator.hasNext()) {
+					Annotation a =(Annotation)annotationIterator.next();
+					if(a instanceof MarkerAnnotation) {
+						IMarker marker = ((MarkerAnnotation)a).getMarker();
+						if(marker.getAttribute(IMarker.LINE_NUMBER, -1) == lineNumber) {
+							return a.getText();
+						}
+					}
+				}
+				return super.getHoverInfo(sourceViewer, lineNumber);
+			}
+		};
 	}
 	
 	
@@ -83,6 +107,14 @@ public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration 
 		damageRepairer = new DefaultDamagerRepairer(new SingleTokenScanner(styleProvider.getRealStyle()));
 		reconciler.setDamager(damageRepairer, SmlTokenTypes.REAL);
 		reconciler.setRepairer(damageRepairer, SmlTokenTypes.REAL);
+		
+		damageRepairer = new DefaultDamagerRepairer(new SingleTokenScanner(styleProvider.getListStyle()));
+		reconciler.setDamager(damageRepairer, SmlTokenTypes.LIST);
+		reconciler.setRepairer(damageRepairer, SmlTokenTypes.LIST);
+		
+		damageRepairer = new DefaultDamagerRepairer(new SingleTokenScanner(styleProvider.getRecordStyle()));
+		reconciler.setDamager(damageRepairer, SmlTokenTypes.RECORD);
+		reconciler.setRepairer(damageRepairer, SmlTokenTypes.RECORD);
         
 		damageRepairer = new DefaultDamagerRepairer(new SmlTextStyleScanner(styleProvider.getKeywordStyle(), styleProvider.getRainbowParensStyle()));
 		reconciler.setDamager(damageRepairer, IDocument.DEFAULT_CONTENT_TYPE);
@@ -93,9 +125,13 @@ public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration 
     
 	@Override
 	public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
+		IPreferenceStore store = SmlUiPlugin.getDefault().getPreferenceStore();
 		ContentAssistant assistant = new ContentAssistant();
 		assistant.setContentAssistProcessor(new SmlContentAssistProcessor(editor), IDocument.DEFAULT_CONTENT_TYPE);
 		assistant.enableAutoActivation(true);
+		assistant.setProposalPopupOrientation(ContentAssistant.PROPOSAL_STACKED);
+		assistant.setAutoActivationDelay(store.getInt(PreferenceConstants.SML_AA_DELAY));
+		assistant.setEmptyMessage("No proposals found");
 		return assistant;
 	}
 	
@@ -118,4 +154,6 @@ public class SmlSourceViewerConfiguration extends TextSourceViewerConfiguration 
     		ISourceViewer sourceViewer) {
     	return super.getQuickAssistAssistant(sourceViewer);
     }
+    
+ 
 }

@@ -1,5 +1,7 @@
 package in.iitd.mldev.process.background;
 
+import in.iitd.mldev.utils.StringUtils;
+
 import java.util.List;
 
 public class SmlException extends SmlObject {
@@ -12,6 +14,11 @@ public class SmlException extends SmlObject {
 	
 	public List<SmlType> getTypes() {
 		return types;
+	}
+	
+	@Override
+	public String toString() {
+		return type + " " + StringUtils.join(types, ",");
 	}
 	
 

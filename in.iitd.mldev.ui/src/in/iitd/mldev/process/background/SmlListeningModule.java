@@ -51,7 +51,7 @@ public class SmlListeningModule implements ISmlModule {
 		return module.getErrors();
 	}
 
-	public List<SmlObject> getDeclaredObjects() {
+	public Collection<SmlObject> getDeclaredObjects() {
 		return module.getDeclaredObjects();
 	}
 

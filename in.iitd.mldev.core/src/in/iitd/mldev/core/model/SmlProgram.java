@@ -76,13 +76,15 @@ public class SmlProgram {
 	/** Updates the representation of the program. This method should
 	 * be called by the editor when the document is changed. */
 	public void update () {
-		parse();
+		boolean shouldFire = parse();
 		bindings = SmlBinding.getBindings(parseTree);
-		fireModelChanged();
+		if(shouldFire) {
+			fireModelChanged();
+		}
 	}
 	
 	/** Updates the parse tree and the list of problems. */
-	private void parse () {
+	private boolean parse () {
 		if (lexer == null)
 			lexer = new SmlLexer();
 		lexer.setDocument(document);
@@ -96,8 +98,10 @@ public class SmlProgram {
 				problems.add(new Region(error.left,error.right-error.left));
 			}
 			parseTree = (ASTRoot) result.value;
+			return true;
 		} catch (Exception e) {
 			parseTree = new ASTRoot();
+			return false;
 		}
 	}
 

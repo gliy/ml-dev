@@ -16,7 +16,7 @@ import org.eclipse.swt.graphics.RGB;
 public class SmlTextStyleProvider {
 
 	private TextAttribute defaultStyle, keywordStyle, stringStyle,
-			commentStyle, integerStyle, realStyle;
+			commentStyle, integerStyle, realStyle, listStyle, recordStyle;
 	private TextAttribute[] rainbowParensStyle;
 
 	/**
@@ -48,6 +48,10 @@ public class SmlTextStyleProvider {
 				SWT.NORMAL);
 		realStyle = new TextAttribute(new Color(null, PreferenceConverter.getColor(store,
 				PreferenceConstants.SML_REAL_COLOR)), null, SWT.NORMAL);
+		listStyle = new TextAttribute(new Color(null, PreferenceConverter.getColor(store,
+				PreferenceConstants.SML_LIST_COLOR)), null, SWT.NORMAL);
+		recordStyle = new TextAttribute(new Color(null, PreferenceConverter.getColor(store,
+				PreferenceConstants.SML_RECORD_COLOR)), null, SWT.NORMAL);
 
 		List<String> keys = SmlUiPlugin.getRainbowParenStrings();
 		rainbowParensStyle = new TextAttribute[keys.size()];
@@ -65,7 +69,7 @@ public class SmlTextStyleProvider {
 	 */
 	public void dispose() {
 		TextAttribute[] styles = { defaultStyle, keywordStyle, stringStyle,
-				commentStyle };
+				commentStyle, integerStyle, realStyle, listStyle, recordStyle };
 		for (int i = 0; i < styles.length; i++) {
 			if (styles[i].getBackground() != null)
 				styles[i].getBackground().dispose();
@@ -99,5 +103,13 @@ public class SmlTextStyleProvider {
 
 	public TextAttribute[] getRainbowParensStyle() {
 		return rainbowParensStyle;
+	}
+
+	public TextAttribute getListStyle() {
+		return listStyle;
+	}
+
+	public TextAttribute getRecordStyle() {
+		return recordStyle;
 	}
 }
